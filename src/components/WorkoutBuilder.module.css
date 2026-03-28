@@ -1,0 +1,236 @@
+.container {
+  flex: 1;
+  padding: 16px 12px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* Saved workouts */
+.savedList {
+  margin-bottom: 20px;
+}
+
+.savedListLabel {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.savedItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  margin-bottom: 6px;
+}
+
+.savedItem span {
+  flex: 1;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.savedActions {
+  display: flex;
+  gap: 4px;
+}
+
+.savedActions button {
+  background: transparent;
+  color: var(--color-text-muted);
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  min-height: 32px;
+  min-width: 32px;
+}
+
+/* Workout name */
+.nameSection {
+  margin-bottom: 16px;
+}
+
+.nameInput {
+  width: 100%;
+  font-size: 1rem;
+}
+
+/* Number controls row */
+.controlsRow {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+/* Grid section */
+.gridSection {
+  margin-bottom: 16px;
+}
+
+.gridHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.gridLabel {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.legend {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.setRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.setLabel {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  min-width: 20px;
+  text-align: right;
+}
+
+.setCells {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  overflow-x: auto;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.toggleBtn {
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  padding: 8px 14px;
+  min-height: 40px;
+  border: 1px solid #333;
+}
+
+/* Advanced overrides */
+.overridesSection {
+  margin-bottom: 16px;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.overridesTitle {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+}
+
+.overrideRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #2a2a3e;
+  font-size: 0.85rem;
+}
+
+.overrideRow:last-child {
+  border-bottom: none;
+}
+
+.overrideLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.overrideInput {
+  width: 56px;
+  text-align: center;
+  padding: 6px 4px;
+  font-size: 0.8rem;
+  min-height: 36px;
+  border-radius: 8px;
+}
+
+.overrideUnit {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.startBtn {
+  flex: 1;
+  background: var(--color-primary);
+  color: white;
+  font-size: 1.1rem;
+  padding: 14px;
+}
+
+.startBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.saveBtn {
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 14px 16px;
+  font-size: 0.9rem;
+}
