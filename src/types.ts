@@ -1,4 +1,4 @@
-export type MuscleGroup = 'legs' | 'back' | 'shoulders' | 'core' | 'fullBody';
+export type MuscleGroup = 'legs' | 'core' | 'cardio' | 'fullBody' | 'arms' | 'chest' | 'shoulders' | 'back';
 
 export interface ExerciseDefinition {
   name: string;
@@ -37,20 +37,31 @@ export interface Segment {
   exerciseIndex: number;
 }
 
-export type Screen = 'builder' | 'timer' | 'summary';
+export type Screen = 'setup' | 'workout' | 'summary';
+
+// Spectral order — adjacent groups share adjacent hues on the colour wheel
+export const MUSCLE_ORDER: MuscleGroup[] = [
+  'legs', 'core', 'cardio', 'fullBody', 'arms', 'chest', 'shoulders', 'back',
+];
 
 export const MUSCLE_COLORS: Record<MuscleGroup, string> = {
-  legs: '#2ecc71',
-  back: '#3498db',
-  shoulders: '#f39c12',
-  core: '#e67e22',
-  fullBody: '#e74c3c',
+  legs:      '#34d399', // green
+  core:      '#c4f000', // lime
+  cardio:    '#ffd43b', // amber
+  fullBody:  '#ff8a65', // orange
+  arms:      '#ff7eb3', // pink
+  chest:     '#e879f9', // magenta
+  shoulders: '#a78bfa', // violet
+  back:      '#60b5ff', // blue
 };
 
 export const MUSCLE_LABELS: Record<MuscleGroup, string> = {
-  legs: 'Legs',
-  back: 'Back',
+  legs:      'Legs',
+  core:      'Core',
+  cardio:    'Cardio',
+  fullBody:  'Full Body',
+  arms:      'Arms',
+  chest:     'Chest',
   shoulders: 'Shoulders',
-  core: 'Core',
-  fullBody: 'Full Body',
+  back:      'Back',
 };

@@ -17,13 +17,14 @@
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 24px;
+  letter-spacing: -0.02em;
 }
 
 .stats {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 32px;
+  gap: 10px;
+  margin-bottom: 36px;
   font-size: 1.1rem;
   color: var(--color-text-muted);
 }
@@ -40,12 +41,14 @@
 .againBtn {
   background: var(--color-primary);
   color: white;
-  padding: 14px 28px;
+  padding: 15px 28px;
   font-size: 1.05rem;
+  border-radius: var(--radius-lg);
 }
 
 .backBtn {
   background: var(--color-surface);
   color: var(--color-text);
-  padding: 14px 28px;
+  padding: 15px 28px;
+  border-radius: var(--radius-lg);
 }

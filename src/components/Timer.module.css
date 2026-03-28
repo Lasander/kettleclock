@@ -7,26 +7,35 @@
   padding: 20px 16px;
   min-height: 100vh;
   min-height: 100dvh;
-  transition: background 0.3s;
+  transition: background 0.35s ease;
 }
 
 .container[data-phase='exercise'] {
-  background: #1f2f2e;
+  background: #0c2415;
 }
 
 .container[data-phase='exerciseRest'] {
-  background: #1a2433;
+  background: #0a1928;
 }
 
 .container[data-phase='setRest'] {
-  background: #2a2220;
+  background: #1e1508;
+}
+
+.container[data-ending='true'] {
+  animation: endingFlash 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes endingFlash {
+  from { background: #0c2415; }
+  to   { background: #2a1010; }
 }
 
 .phase {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  opacity: 0.7;
+  letter-spacing: 0.12em;
+  color: var(--color-text-muted);
   margin-bottom: 8px;
 }
 
@@ -35,6 +44,7 @@
   font-weight: 700;
   text-align: center;
   margin-bottom: 16px;
+  letter-spacing: -0.02em;
 }
 
 .time {
@@ -47,30 +57,41 @@
 }
 
 .progress {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--color-text-muted);
-  margin-bottom: 32px;
+  margin-bottom: 36px;
   text-align: center;
 }
 
 .controls {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .pauseBtn {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
   color: white;
   padding: 14px 32px;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.prevBtn {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  padding: 14px 20px;
+  border-radius: var(--radius-lg);
 }
 
 .skipBtn {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   color: white;
-  padding: 14px 24px;
+  padding: 14px 20px;
+  border-radius: var(--radius-lg);
 }
 
 .abortBtn {

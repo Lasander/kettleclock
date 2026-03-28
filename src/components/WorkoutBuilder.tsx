@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import type { Workout, ExerciseSlot } from '../types';
-import { MUSCLE_COLORS, MUSCLE_LABELS } from '../types';
-import type { MuscleGroup } from '../types';
+import { MUSCLE_COLORS, MUSCLE_LABELS, MUSCLE_ORDER } from '../types';
 import { getExerciseDef } from '../exercises';
 import { loadWorkouts, saveWorkout, deleteWorkout } from '../storage';
 import { generateId } from '../utils';
+import { resumeAudio } from '../audio';
+import { Logo } from './Logo';
 import { ExerciseCell } from './ExerciseCell';
 import { NumberControl } from './NumberControl';
 import { QuickFill } from './QuickFill';
@@ -39,27 +40,17 @@ function newWorkout(): Workout {
   };
 }
 
-/** Resize a grid preserving existing slots where possible. */
-function resizeGrid(
-  grid: ExerciseSlot[][],
-  newSets: number,
-  newPerSet: number
-): ExerciseSlot[][] {
+function resizeGrid(grid: ExerciseSlot[][], newSets: number, newPerSet: number): ExerciseSlot[][] {
   return Array.from({ length: newSets }, (_, s) => {
-    const existingRow = grid[s] ?? [];
-    return Array.from({ length: newPerSet }, (_, e) => existingRow[e] ?? makeSlot());
+    const row = grid[s] ?? [];
+    return Array.from({ length: newPerSet }, (_, e) => row[e] ?? makeSlot());
   });
 }
 
-/** Migrate old workout format (exercises array) to new grid format. */
 function migrateWorkout(w: any): Workout {
   if (w.grid) {
-    return {
-      ...w,
-      setsCount: w.setsCount ?? w.sets ?? 5,
-    };
+    return { ...w, setsCount: w.setsCount ?? w.sets ?? 5 };
   }
-  // Old format: flat exercises array, sets count
   const exercises: any[] = w.exercises ?? [];
   const sets = w.sets ?? w.setsCount ?? 5;
   const perSet = w.exercisesPerSet ?? exercises.length;
@@ -80,16 +71,17 @@ function migrateWorkout(w: any): Workout {
   };
 }
 
-const MUSCLE_KEYS = Object.keys(MUSCLE_COLORS) as MuscleGroup[];
-
 export function WorkoutBuilder({ onStart }: Props) {
   const [workout, setWorkout] = useState<Workout>(newWorkout);
   const [saved, setSaved] = useState<Workout[]>([]);
   const [showOverrides, setShowOverrides] = useState(false);
 
-  // Drag state for reorder within a set row
-  const dragRef = useRef<{ setIdx: number; exIdx: number } | null>(null);
-  const [dragOver, setDragOver] = useState<{ setIdx: number; exIdx: number } | null>(null);
+  // Edit mode (grid reorder)
+  const [editMode, setEditMode] = useState(false);
+  const dragSourceRef = useRef<{ s: number; e: number } | null>(null);
+  const dragTargetRef = useRef<{ s: number; e: number } | null>(null);
+  const [dragSource, setDragSource] = useState<{ s: number; e: number } | null>(null);
+  const [dragTarget, setDragTarget] = useState<{ s: number; e: number } | null>(null);
 
   useEffect(() => {
     setSaved(loadWorkouts());
@@ -97,9 +89,8 @@ export function WorkoutBuilder({ onStart }: Props) {
 
   const refreshSaved = () => setSaved(loadWorkouts());
 
-  // Compute duplicates per set row
   const duplicatesMap = useMemo(() => {
-    const map = new Map<string, Set<string>>(); // key: "s" -> set of duplicate names
+    const map = new Map<string, Set<string>>();
     for (let s = 0; s < workout.grid.length; s++) {
       const counts: Record<string, number> = {};
       for (const slot of workout.grid[s]) {
@@ -116,25 +107,16 @@ export function WorkoutBuilder({ onStart }: Props) {
   }, []);
 
   const handleSetsChange = useCallback((val: number) => {
-    updateWorkout((w) => ({
-      ...w,
-      setsCount: val,
-      grid: resizeGrid(w.grid, val, w.exercisesPerSet),
-    }));
+    updateWorkout((w) => ({ ...w, setsCount: val, grid: resizeGrid(w.grid, val, w.exercisesPerSet) }));
   }, [updateWorkout]);
 
   const handleExercisesPerSetChange = useCallback((val: number) => {
-    updateWorkout((w) => ({
-      ...w,
-      exercisesPerSet: val,
-      grid: resizeGrid(w.grid, w.setsCount, val),
-    }));
+    updateWorkout((w) => ({ ...w, exercisesPerSet: val, grid: resizeGrid(w.grid, w.setsCount, val) }));
   }, [updateWorkout]);
 
   const handleCellChange = useCallback((setIdx: number, exIdx: number, name: string) => {
     updateWorkout((w) => {
       const grid = w.grid.map((row) => [...row]);
-      grid[setIdx] = [...grid[setIdx]];
       grid[setIdx][exIdx] = { ...grid[setIdx][exIdx], exerciseName: name };
       return { ...w, grid };
     });
@@ -144,7 +126,6 @@ export function WorkoutBuilder({ onStart }: Props) {
     (setIdx: number, exIdx: number, field: 'duration' | 'restAfter', value: number | undefined) => {
       updateWorkout((w) => {
         const grid = w.grid.map((row) => [...row]);
-        grid[setIdx] = [...grid[setIdx]];
         grid[setIdx][exIdx] = { ...grid[setIdx][exIdx], [field]: value };
         return { ...w, grid };
       });
@@ -152,34 +133,50 @@ export function WorkoutBuilder({ onStart }: Props) {
     [updateWorkout]
   );
 
-  // Drag-and-drop reorder within a set
-  const handleDragStart = (setIdx: number, exIdx: number) => {
-    dragRef.current = { setIdx, exIdx };
-  };
+  // ── Edit mode grid drag ──────────────────────────────────────────────
+  const swapCells = useCallback((src: { s: number; e: number }, dst: { s: number; e: number }) => {
+    updateWorkout((w) => {
+      const grid = w.grid.map((row) => [...row]);
+      const tmp = grid[src.s][src.e];
+      grid[src.s][src.e] = grid[dst.s][dst.e];
+      grid[dst.s][dst.e] = tmp;
+      return { ...w, grid };
+    });
+  }, [updateWorkout]);
 
-  const handleDragOver = (setIdx: number, exIdx: number) => {
-    setDragOver({ setIdx, exIdx });
-  };
+  const handleGridPointerDown = useCallback((e: React.PointerEvent) => {
+    if (!editMode) return;
+    const cell = (e.target as Element).closest('[data-cell]') as HTMLElement | null;
+    if (!cell) return;
+    const pos = { s: Number(cell.dataset.set), e: Number(cell.dataset.ex) };
+    dragSourceRef.current = pos;
+    dragTargetRef.current = pos;
+    setDragSource(pos);
+    setDragTarget(pos);
+  }, [editMode]);
 
-  const handleDragEnd = (setIdx: number, exIdx: number) => {
-    const src = dragRef.current;
-    if (!src || src.setIdx !== setIdx) {
-      dragRef.current = null;
-      setDragOver(null);
-      return;
+  const handleGridPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!editMode || !dragSourceRef.current) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const cell = el?.closest('[data-cell]') as HTMLElement | null;
+    if (cell) {
+      const pos = { s: Number(cell.dataset.set), e: Number(cell.dataset.ex) };
+      dragTargetRef.current = pos;
+      setDragTarget(pos);
     }
-    if (src.exIdx !== exIdx) {
-      updateWorkout((w) => {
-        const row = [...w.grid[setIdx]];
-        const [moved] = row.splice(src.exIdx, 1);
-        row.splice(exIdx, 0, moved);
-        const grid = w.grid.map((r, i) => (i === setIdx ? row : r));
-        return { ...w, grid };
-      });
+  }, [editMode]);
+
+  const handleGridPointerUp = useCallback(() => {
+    const src = dragSourceRef.current;
+    const tgt = dragTargetRef.current;
+    if (src && tgt && (src.s !== tgt.s || src.e !== tgt.e)) {
+      swapCells(src, tgt);
     }
-    dragRef.current = null;
-    setDragOver(null);
-  };
+    dragSourceRef.current = null;
+    dragTargetRef.current = null;
+    setDragSource(null);
+    setDragTarget(null);
+  }, [swapCells]);
 
   const handleQuickFill = useCallback((grid: ExerciseSlot[][]) => {
     updateWorkout((w) => ({ ...w, grid }));
@@ -198,6 +195,7 @@ export function WorkoutBuilder({ onStart }: Props) {
   const handleLoad = (w: Workout) => {
     setWorkout(migrateWorkout(w));
     setShowOverrides(false);
+    setEditMode(false);
   };
 
   const handleDelete = (id: string) => {
@@ -208,13 +206,18 @@ export function WorkoutBuilder({ onStart }: Props) {
   const handleNew = () => {
     setWorkout(newWorkout());
     setShowOverrides(false);
+    setEditMode(false);
   };
 
   const canStart = workout.setsCount > 0 && workout.exercisesPerSet > 0;
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>🔔 KettleClock</h1>
+      {/* Header / logo */}
+      <div className={styles.header}>
+        <Logo size={48} />
+        <h1 className={styles.title}>KettleClock</h1>
+      </div>
 
       {saved.length > 0 && (
         <div className={styles.savedList}>
@@ -254,15 +257,11 @@ export function WorkoutBuilder({ onStart }: Props) {
       <div className={styles.gridSection}>
         <div className={styles.gridHeader}>
           <span className={styles.gridLabel}>Exercise Grid</span>
-          <QuickFill
-            setsCount={workout.setsCount}
-            exercisesPerSet={workout.exercisesPerSet}
-            onFill={handleQuickFill}
-          />
+          <QuickFill setsCount={workout.setsCount} exercisesPerSet={workout.exercisesPerSet} onFill={handleQuickFill} />
         </div>
 
         <div className={styles.legend}>
-          {MUSCLE_KEYS.map((m) => (
+          {MUSCLE_ORDER.map((m) => (
             <span key={m} className={styles.legendItem}>
               <span className={styles.legendDot} style={{ background: MUSCLE_COLORS[m] }} />
               {MUSCLE_LABELS[m]}
@@ -270,7 +269,14 @@ export function WorkoutBuilder({ onStart }: Props) {
           ))}
         </div>
 
-        <div className={styles.grid}>
+        <div
+          className={`${styles.grid}${editMode ? ` ${styles.gridEditMode}` : ''}`}
+          onPointerDown={handleGridPointerDown}
+          onPointerMove={handleGridPointerMove}
+          onPointerUp={handleGridPointerUp}
+          onPointerLeave={handleGridPointerUp}
+          style={editMode ? { touchAction: 'none' } : undefined}
+        >
           {workout.grid.map((row, s) => (
             <div key={s} className={styles.setRow}>
               <span className={styles.setLabel}>{s + 1}</span>
@@ -282,12 +288,12 @@ export function WorkoutBuilder({ onStart }: Props) {
                       key={slot.id}
                       exerciseName={slot.exerciseName}
                       isDuplicate={!!(slot.exerciseName && dupes?.has(slot.exerciseName))}
+                      setIdx={s}
+                      exIdx={e}
                       onChange={(name) => handleCellChange(s, e, name)}
-                      onDragStart={() => handleDragStart(s, e)}
-                      onDragOver={() => handleDragOver(s, e)}
-                      onDragEnd={() => handleDragEnd(s, e)}
-                      isDragging={dragRef.current?.setIdx === s && dragRef.current?.exIdx === e}
-                      isDragOver={dragOver?.setIdx === s && dragOver?.exIdx === e}
+                      editMode={editMode}
+                      isSource={!!(dragSource && dragSource.s === s && dragSource.e === e)}
+                      isTarget={!!(dragTarget && dragTarget.s === s && dragTarget.e === e && dragSource && (dragSource.s !== s || dragSource.e !== e))}
                     />
                   );
                 })}
@@ -299,9 +305,12 @@ export function WorkoutBuilder({ onStart }: Props) {
 
       <div className={styles.toolbar}>
         <button
-          className={styles.toggleBtn}
-          onClick={() => setShowOverrides((s) => !s)}
+          className={`${styles.toggleBtn}${editMode ? ` ${styles.toggleBtnActive}` : ''}`}
+          onClick={() => setEditMode((m) => !m)}
         >
+          {editMode ? '✓ Done Reordering' : '↕ Reorder'}
+        </button>
+        <button className={styles.toggleBtn} onClick={() => setShowOverrides((s) => !s)}>
           {showOverrides ? 'Hide overrides ▴' : 'Per-exercise timing ▾'}
         </button>
       </div>
@@ -351,13 +360,13 @@ export function WorkoutBuilder({ onStart }: Props) {
       )}
 
       <div className={styles.actions}>
-        <button className={styles.saveBtn} onClick={handleSave}>
-          Save
-        </button>
-        <button className={styles.saveBtn} onClick={handleNew}>
-          New
-        </button>
-        <button className={styles.startBtn} onClick={() => onStart(workout)} disabled={!canStart}>
+        <button className={styles.saveBtn} onClick={handleSave}>Save</button>
+        <button className={styles.saveBtn} onClick={handleNew}>New</button>
+        <button
+          className={styles.startBtn}
+          onClick={() => { resumeAudio(); onStart(workout); }}
+          disabled={!canStart}
+        >
           Start Workout
         </button>
       </div>

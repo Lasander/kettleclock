@@ -4,25 +4,26 @@
 }
 
 .trigger {
-  background: var(--color-surface);
+  background: transparent;
   color: var(--color-primary);
   font-size: 0.85rem;
   padding: 10px 16px;
-  border: 1px solid #333;
+  border: none;
 }
 
 .menu {
   position: absolute;
   top: 100%;
-  left: 0;
+  left: auto;
   right: 0;
-  min-width: 200px;
-  background: var(--color-surface);
-  border: 1px solid #333;
+  min-width: 220px;
+  background: var(--color-surface-elevated);
+  border: none;
   border-radius: var(--radius);
   margin-top: 4px;
   z-index: 100;
   overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45);
 }
 
 .menuItem {
@@ -36,7 +37,7 @@
   font-size: 0.9rem;
   border-radius: 0;
   min-height: 44px;
-  border-bottom: 1px solid #2a2a3e;
+  border-bottom: 0.5px solid var(--color-separator);
 }
 
 .menuItem:last-child {

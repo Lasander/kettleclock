@@ -5,12 +5,12 @@ import styles from './ExerciseCell.module.css';
 interface Props {
   exerciseName: string;
   isDuplicate: boolean;
+  setIdx: number;
+  exIdx: number;
   onChange: (name: string) => void;
-  onDragStart?: () => void;
-  onDragOver?: () => void;
-  onDragEnd?: () => void;
-  isDragging?: boolean;
-  isDragOver?: boolean;
+  editMode?: boolean;
+  isSource?: boolean;
+  isTarget?: boolean;
 }
 
 function getCellStyle(exerciseName: string): React.CSSProperties {
@@ -28,21 +28,23 @@ function getCellStyle(exerciseName: string): React.CSSProperties {
 export function ExerciseCell({
   exerciseName,
   isDuplicate,
+  setIdx,
+  exIdx,
   onChange,
-  onDragStart,
-  onDragOver,
-  onDragEnd,
-  isDragging,
-  isDragOver,
+  editMode,
+  isSource,
+  isTarget,
 }: Props) {
   const def = getExerciseDef(exerciseName);
   const abbr = def?.abbr ?? '';
+
   const classNames = [
     styles.cell,
     !exerciseName && styles.empty,
     isDuplicate && styles.duplicate,
-    isDragging && styles.dragging,
-    isDragOver && styles.dragOver,
+    editMode && styles.editMode,
+    isSource && styles.source,
+    isTarget && styles.target,
   ]
     .filter(Boolean)
     .join(' ');
@@ -51,37 +53,34 @@ export function ExerciseCell({
     <div
       className={classNames}
       style={getCellStyle(exerciseName)}
-      draggable
-      onDragStart={(e) => {
-        e.dataTransfer.effectAllowed = 'move';
-        onDragStart?.();
-      }}
-      onDragOver={(e) => {
-        e.preventDefault();
-        onDragOver?.();
-      }}
-      onDrop={(e) => {
-        e.preventDefault();
-        onDragEnd?.();
-      }}
-      onTouchStart={() => {
-        // Touch drag is handled by parent for reorder
-      }}
+      data-cell=""
+      data-set={setIdx}
+      data-ex={exIdx}
     >
-      {exerciseName ? abbr : '+'}
-      <select
-        className={styles.hiddenSelect}
-        value={exerciseName}
-        onChange={(e) => onChange(e.target.value)}
-        aria-label={exerciseName || 'Select exercise'}
-      >
-        <option value="">— Empty —</option>
-        {EXERCISE_LIBRARY.map((ex) => (
-          <option key={ex.name} value={ex.name}>
-            {ex.abbr} — {ex.name}
-          </option>
-        ))}
-      </select>
+      {editMode ? (
+        <>
+          <span className={styles.dragHandle}>⠿</span>
+          <span className={styles.abbrText}>{abbr || '+'}</span>
+        </>
+      ) : (
+        <>
+          {exerciseName ? abbr : '+'}
+          <select
+            className={styles.hiddenSelect}
+            value={exerciseName}
+            onChange={(e) => onChange(e.target.value)}
+            aria-label={exerciseName || 'Select exercise'}
+          >
+            <option value="">— Empty —</option>
+            {EXERCISE_LIBRARY.map((ex) => (
+              <option key={ex.name} value={ex.name}>
+                {ex.abbr} — {ex.name}
+              </option>
+            ))}
+          </select>
+        </>
+      )}
     </div>
   );
 }
+

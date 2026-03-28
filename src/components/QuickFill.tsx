@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import type { ExerciseSlot, MuscleGroup } from '../types';
+import type { ExerciseSlot } from '../types';
+import { MUSCLE_ORDER } from '../types';
 import { EXERCISE_LIBRARY, getExercisesByMuscle } from '../exercises';
 import { generateId } from '../utils';
 import styles from './QuickFill.module.css';
-
-const MUSCLE_GROUPS: MuscleGroup[] = ['legs', 'back', 'shoulders', 'core', 'fullBody'];
 
 function pickRandom<T>(arr: T[], count: number): T[] {
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
@@ -57,24 +56,24 @@ export function QuickFill({ setsCount, exercisesPerSet, onFill }: Props) {
 
   const fillMusclePerSet = () => {
     const grid = Array.from({ length: setsCount }, (_, s) => {
-      const muscle = MUSCLE_GROUPS[s % MUSCLE_GROUPS.length];
+      const muscle = MUSCLE_ORDER[s % MUSCLE_ORDER.length];
       const available = getExercisesByMuscle(muscle);
-      const picked = pickRandom(available.length >= exercisesPerSet ? available : EXERCISE_LIBRARY, exercisesPerSet);
-      return picked.map((ex) => makeSlot(ex.name));
+      const pool = available.length >= exercisesPerSet ? available : EXERCISE_LIBRARY;
+      return pickRandom(pool, exercisesPerSet).map((ex) => makeSlot(ex.name));
     });
     onFill(grid);
     setOpen(false);
   };
 
   const fillAlternateMuscles = () => {
-    const grid = Array.from({ length: setsCount }, () => {
-      return Array.from({ length: exercisesPerSet }, (_, e) => {
-        const muscle = MUSCLE_GROUPS[e % MUSCLE_GROUPS.length];
+    const grid = Array.from({ length: setsCount }, () =>
+      Array.from({ length: exercisesPerSet }, (_, e) => {
+        const muscle = MUSCLE_ORDER[e % MUSCLE_ORDER.length];
         const available = getExercisesByMuscle(muscle);
-        const picked = pickRandom(available.length > 0 ? available : EXERCISE_LIBRARY, 1);
-        return makeSlot(picked[0]?.name ?? '');
-      });
-    });
+        const pool = available.length > 0 ? available : EXERCISE_LIBRARY;
+        return makeSlot(pickRandom(pool, 1)[0]?.name ?? '');
+      })
+    );
     onFill(grid);
     setOpen(false);
   };
@@ -108,3 +107,4 @@ export function QuickFill({ setsCount, exercisesPerSet, onFill }: Props) {
     </div>
   );
 }
+

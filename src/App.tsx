@@ -5,13 +5,13 @@ import { Timer } from './components/Timer';
 import { Summary } from './components/Summary';
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('builder');
+  const [screen, setScreen] = useState<Screen>('setup');
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [elapsed, setElapsed] = useState(0);
 
   const handleStart = (w: Workout) => {
     setWorkout(w);
-    setScreen('timer');
+    setScreen('workout');
   };
 
   const handleDone = (elapsedSec: number) => {
@@ -20,18 +20,18 @@ export default function App() {
   };
 
   const handleAbort = () => {
-    setScreen('builder');
+    setScreen('setup');
   };
 
   const handleAgain = () => {
-    setScreen('timer');
+    setScreen('workout');
   };
 
   const handleBack = () => {
-    setScreen('builder');
+    setScreen('setup');
   };
 
-  if (screen === 'timer' && workout) {
+  if (screen === 'workout' && workout) {
     return <Timer key={Date.now()} workout={workout} onDone={handleDone} onAbort={handleAbort} />;
   }
 

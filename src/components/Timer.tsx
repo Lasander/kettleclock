@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Workout, Segment } from '../types';
 import { buildSegments } from '../segments';
-import { resumeAudio, playCountdownBeep, playExerciseStart, playHalfTime, playSetRest } from '../audio';
+import { resumeAudio, playCountdownBeep, playExerciseStart, playHalfTime, playExerciseEnding, playSetRest } from '../audio';
 import { requestWakeLock, releaseWakeLock, reacquireOnVisibilityChange } from '../wakeLock';
 import styles from './Timer.module.css';
 
@@ -39,13 +39,25 @@ export function Timer({ workout, onDone, onAbort }: Props) {
     setSegIndex(next);
     setRemaining(segments[next].duration);
     playedBeepsRef.current.clear();
-    // Audio cue for next segment
     if (segments[next].type === 'exercise') {
       playExerciseStart();
     } else if (segments[next].type === 'setRest') {
       playSetRest();
     }
   }, [segIndex, segments, onDone]);
+
+  const goBack = useCallback(() => {
+    const prev = segIndex - 1;
+    if (prev < 0) {
+      // Restart current segment
+      setRemaining(seg?.duration ?? 0);
+      playedBeepsRef.current.clear();
+      return;
+    }
+    setSegIndex(prev);
+    setRemaining(segments[prev].duration);
+    playedBeepsRef.current.clear();
+  }, [segIndex, segments, seg]);
 
   // Countdown tick
   useEffect(() => {
@@ -62,13 +74,13 @@ export function Timer({ workout, onDone, onAbort }: Props) {
     return () => clearInterval(intervalRef.current);
   }, [paused, advance]);
 
-  // Countdown beeps before exercises & half-time beep
+  // Beep effects
   useEffect(() => {
     if (paused || !seg) return;
     const key = `${segIndex}-${remaining}`;
     if (playedBeepsRef.current.has(key)) return;
 
-    // Countdown beeps during rest/countdown segments: beep at 3, 2, 1
+    // Countdown beeps at end of rest segments (next exercise is coming)
     if (seg.type === 'exerciseRest' || seg.type === 'setRest' || seg.type === 'initialCountdown') {
       if (remaining <= 3 && remaining >= 1) {
         playedBeepsRef.current.add(key);
@@ -76,12 +88,17 @@ export function Timer({ workout, onDone, onAbort }: Props) {
       }
     }
 
-    // Half-time beep during exercise
+    // Exercise half-time beep
     if (seg.type === 'exercise') {
       const halfTime = Math.ceil(seg.duration / 2);
       if (remaining === halfTime && halfTime !== seg.duration) {
         playedBeepsRef.current.add(key);
         playHalfTime();
+      }
+      // Ending beeps at T-3, T-2, T-1 of exercise
+      if (remaining <= 3 && remaining >= 1) {
+        playedBeepsRef.current.add(key);
+        playExerciseEnding();
       }
     }
   }, [remaining, paused, seg, segIndex]);
@@ -114,11 +131,16 @@ export function Timer({ workout, onDone, onAbort }: Props) {
           ? 'Set Rest'
           : 'Get Ready';
 
-  // Map initialCountdown to exerciseRest for styling (blue)
+  // Map initialCountdown → exerciseRest for colour styling (blue)
   const phaseData = seg.type === 'initialCountdown' ? 'exerciseRest' : seg.type;
+  const isEndingSoon = seg.type === 'exercise' && remaining <= 3 && remaining >= 1;
 
   return (
-    <div className={styles.container} data-phase={phaseData}>
+    <div
+      className={styles.container}
+      data-phase={phaseData}
+      data-ending={isEndingSoon ? 'true' : undefined}
+    >
       <div className={styles.phase}>{phaseLabel}</div>
       <div className={styles.label}>{seg.label}</div>
       <div className={styles.time} aria-live="polite" aria-atomic="true">
@@ -132,8 +154,11 @@ export function Timer({ workout, onDone, onAbort }: Props) {
         <button className={styles.pauseBtn} onClick={() => setPaused((p) => !p)}>
           {paused ? '▶ Resume' : '⏸ Pause'}
         </button>
+        <button className={styles.prevBtn} onClick={goBack} aria-label="Previous segment">
+          ◀ Prev
+        </button>
         <button className={styles.skipBtn} onClick={advance}>
-          Skip ⏭
+          Skip ▶
         </button>
         <button className={styles.abortBtn} onClick={handleAbort}>
           Abort

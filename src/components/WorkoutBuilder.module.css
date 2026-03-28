@@ -1,45 +1,71 @@
 .container {
   flex: 1;
-  padding: 16px 12px;
+  padding: 0 16px 32px;
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
 }
 
-.title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-bottom: 16px;
-  text-align: center;
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 0 10px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg);
 }
 
-/* Saved workouts */
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
 .savedList {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .savedListLabel {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   margin-bottom: 6px;
+  padding-left: 4px;
 }
 
 .savedItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
+  padding: 12px 16px;
   background: var(--color-surface);
+}
+
+.savedItem:first-of-type {
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.savedItem:last-of-type {
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.savedItem:only-of-type {
   border-radius: var(--radius);
-  margin-bottom: 6px;
+}
+
+.savedItem + .savedItem {
+  border-top: 0.5px solid var(--color-separator);
 }
 
 .savedItem span {
   flex: 1;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 
 .savedActions {
@@ -50,33 +76,35 @@
 .savedActions button {
   background: transparent;
   color: var(--color-text-muted);
-  padding: 4px 8px;
+  padding: 4px 10px;
   font-size: 0.8rem;
   min-height: 32px;
   min-width: 32px;
 }
 
-/* Workout name */
 .nameSection {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .nameInput {
   width: 100%;
   font-size: 1rem;
+  background: var(--color-surface);
+  border-radius: var(--radius);
 }
 
-/* Number controls row */
 .controlsRow {
   display: flex;
   gap: 8px;
   justify-content: center;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
-/* Grid section */
 .gridSection {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 16px;
   margin-bottom: 16px;
 }
 
@@ -84,21 +112,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .gridLabel {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 .legend {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .legendItem {
@@ -119,30 +147,37 @@
 .grid {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  align-items: center;
+}
+
+.gridEditMode {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 6px;
+  border-radius: var(--radius);
 }
 
 .setRow {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  justify-content: center;
 }
 
 .setLabel {
   font-size: 0.7rem;
   color: var(--color-text-muted);
-  min-width: 20px;
+  min-width: 18px;
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .setCells {
   display: flex;
-  gap: 6px;
-  flex: 1;
+  gap: 8px;
   overflow-x: auto;
 }
 
-/* Toolbar */
 .toolbar {
   display: flex;
   gap: 8px;
@@ -151,34 +186,41 @@
 }
 
 .toggleBtn {
-  background: transparent;
+  background: var(--color-surface);
   color: var(--color-text-muted);
-  font-size: 0.8rem;
-  padding: 8px 14px;
-  min-height: 40px;
-  border: 1px solid #333;
+  font-size: 0.82rem;
+  padding: 9px 16px;
+  min-height: 36px;
+  border: none;
+  border-radius: 20px;
 }
 
-/* Advanced overrides */
+.toggleBtnActive {
+  background: var(--color-primary);
+  color: white;
+}
+
 .overridesSection {
   margin-bottom: 16px;
   background: var(--color-surface);
-  border-radius: var(--radius);
-  padding: 12px;
+  border-radius: var(--radius-lg);
+  padding: 16px;
 }
 
 .overridesTitle {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--color-text-muted);
-  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
 }
 
 .overrideRow {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 0;
-  border-bottom: 1px solid #2a2a3e;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--color-separator);
   font-size: 0.85rem;
 }
 
@@ -201,6 +243,7 @@
   font-size: 0.8rem;
   min-height: 36px;
   border-radius: 8px;
+  background: var(--color-surface-elevated);
 }
 
 .overrideUnit {
@@ -208,29 +251,31 @@
   color: var(--color-text-muted);
 }
 
-/* Actions */
 .actions {
   display: flex;
-  gap: 8px;
-  margin-top: 20px;
+  gap: 10px;
+  margin-top: 24px;
+  padding-bottom: 16px;
 }
 
 .startBtn {
   flex: 1;
   background: var(--color-primary);
   color: white;
-  font-size: 1.1rem;
-  padding: 14px;
+  font-size: 1.05rem;
+  padding: 15px;
+  border-radius: var(--radius-lg);
 }
 
 .startBtn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
 .saveBtn {
   background: var(--color-surface);
   color: var(--color-text);
-  padding: 14px 16px;
+  padding: 15px 18px;
   font-size: 0.9rem;
+  border-radius: var(--radius-lg);
 }
