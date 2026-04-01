@@ -34,6 +34,8 @@ body {
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   -webkit-text-size-adjust: 100%;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 #root {
@@ -75,6 +77,8 @@ input, select {
   -webkit-appearance: none;
   appearance: none;
   -webkit-tap-highlight-color: transparent;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 select {

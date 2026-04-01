@@ -240,6 +240,8 @@ export function WorkoutBuilder({ onStart }: Props) {
         <input
           className={styles.nameInput}
           type="text"
+          name="workout-name"
+          autoComplete="off"
           value={workout.name}
           onChange={(e) => updateWorkout((w) => ({ ...w, name: e.target.value }))}
           placeholder="Workout name"

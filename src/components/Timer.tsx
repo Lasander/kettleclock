@@ -135,31 +135,53 @@ export function Timer({ workout, onDone, onAbort }: Props) {
   const phaseData = seg.type === 'initialCountdown' ? 'exerciseRest' : seg.type;
   const isEndingSoon = seg.type === 'exercise' && remaining <= 3 && remaining >= 1;
 
+  // "Up Next" info during rest phases
+  const nextSeg = segIndex + 1 < segments.length ? segments[segIndex + 1] : null;
+  let upNextText: string | null = null;
+  if (seg.type === 'exerciseRest' || seg.type === 'initialCountdown') {
+    if (nextSeg) {
+      upNextText = nextSeg.label;
+    }
+  } else if (seg.type === 'setRest') {
+    if (nextSeg) {
+      upNextText = `Set ${nextSeg.setIndex + 1} — ${nextSeg.label}`;
+    }
+  }
+
   return (
     <div
       className={styles.container}
       data-phase={phaseData}
       data-ending={isEndingSoon ? 'true' : undefined}
     >
-      <div className={styles.phase}>{phaseLabel}</div>
-      <div className={styles.label}>{seg.label}</div>
-      <div className={styles.time} aria-live="polite" aria-atomic="true">
-        {formatTime(remaining)}
-      </div>
-      <div className={styles.progress}>
-        Set {seg.setIndex + 1}/{workout.setsCount} &middot; Exercise{' '}
-        {seg.exerciseIndex + 1}/{workout.exercisesPerSet}
+      <div className={styles.info}>
+        <div className={styles.phase}>{phaseLabel}</div>
+        <div className={styles.label}>{seg.label}</div>
+        <div className={styles.time} aria-live="polite" aria-atomic="true">
+          {formatTime(remaining)}
+        </div>
+        <div className={styles.progress}>
+          Set {seg.setIndex + 1}/{workout.setsCount} &middot; Exercise{' '}
+          {seg.exerciseIndex + 1}/{workout.exercisesPerSet}
+        </div>
+        {upNextText && (
+          <div className={styles.upNext}>
+            Up next: <span className={styles.upNextLabel}>{upNextText}</span>
+          </div>
+        )}
       </div>
       <div className={styles.controls}>
         <button className={styles.pauseBtn} onClick={() => setPaused((p) => !p)}>
           {paused ? '▶ Resume' : '⏸ Pause'}
         </button>
-        <button className={styles.prevBtn} onClick={goBack} aria-label="Previous segment">
-          ◀ Prev
-        </button>
-        <button className={styles.skipBtn} onClick={advance}>
-          Skip ▶
-        </button>
+        <div className={styles.navRow}>
+          <button className={styles.prevBtn} onClick={goBack} aria-label="Previous segment">
+            ◀ Prev
+          </button>
+          <button className={styles.skipBtn} onClick={advance}>
+            Skip ▶
+          </button>
+        </div>
         <button className={styles.abortBtn} onClick={handleAbort}>
           Abort
         </button>
