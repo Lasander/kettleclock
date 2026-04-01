@@ -84,6 +84,22 @@
   font-weight: 700;
 }
 
+.upNextList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.upNextItem {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
 .controls {
   display: flex;
   flex-direction: column;

@@ -138,13 +138,20 @@ export function Timer({ workout, onDone, onAbort }: Props) {
   // "Up Next" info during rest phases
   const nextSeg = segIndex + 1 < segments.length ? segments[segIndex + 1] : null;
   let upNextText: string | null = null;
+  let upNextList: string[] | null = null;
   if (seg.type === 'exerciseRest' || seg.type === 'initialCountdown') {
     if (nextSeg) {
       upNextText = nextSeg.label;
     }
   } else if (seg.type === 'setRest') {
-    if (nextSeg) {
-      upNextText = `Set ${nextSeg.setIndex + 1} — ${nextSeg.label}`;
+    // Show all exercises from the upcoming set
+    const nextSetIdx = seg.setIndex + 1;
+    const nextRow = workout.grid[nextSetIdx];
+    if (nextRow) {
+      upNextText = `Set ${nextSetIdx + 1}`;
+      upNextList = nextRow
+        .map((slot) => slot.exerciseName || '(empty)')
+        .filter(Boolean);
     }
   }
 
@@ -167,6 +174,13 @@ export function Timer({ workout, onDone, onAbort }: Props) {
         {upNextText && (
           <div className={styles.upNext}>
             Up next: <span className={styles.upNextLabel}>{upNextText}</span>
+            {upNextList && (
+              <div className={styles.upNextList}>
+                {upNextList.map((name, i) => (
+                  <span key={i} className={styles.upNextItem}>{name}</span>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

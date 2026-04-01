@@ -1,5 +1,7 @@
-import { EXERCISE_LIBRARY, getExerciseDef } from '../exercises';
+import { useState } from 'react';
+import { getExerciseDef, getShortName } from '../exercises';
 import { MUSCLE_COLORS } from '../types';
+import { ExercisePicker } from './ExercisePicker';
 import styles from './ExerciseCell.module.css';
 
 interface Props {
@@ -35,8 +37,8 @@ export function ExerciseCell({
   isSource,
   isTarget,
 }: Props) {
-  const def = getExerciseDef(exerciseName);
-  const abbr = def?.abbr ?? '';
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const displayName = exerciseName ? getShortName(exerciseName) : '';
 
   const classNames = [
     styles.cell,
@@ -50,37 +52,32 @@ export function ExerciseCell({
     .join(' ');
 
   return (
-    <div
-      className={classNames}
-      style={getCellStyle(exerciseName)}
-      data-cell=""
-      data-set={setIdx}
-      data-ex={exIdx}
-    >
-      {editMode ? (
-        <>
-          <span className={styles.dragHandle}>⠿</span>
-          <span className={styles.abbrText}>{abbr || '+'}</span>
-        </>
-      ) : (
-        <>
-          {exerciseName ? abbr : '+'}
-          <select
-            className={styles.hiddenSelect}
-            value={exerciseName}
-            onChange={(e) => onChange(e.target.value)}
-            aria-label={exerciseName || 'Select exercise'}
-          >
-            <option value="">— Empty —</option>
-            {EXERCISE_LIBRARY.map((ex) => (
-              <option key={ex.name} value={ex.name}>
-                {ex.abbr} — {ex.name}
-              </option>
-            ))}
-          </select>
-        </>
+    <>
+      <div
+        className={classNames}
+        style={getCellStyle(exerciseName)}
+        data-cell=""
+        data-set={setIdx}
+        data-ex={exIdx}
+        onClick={!editMode ? () => setPickerOpen(true) : undefined}
+      >
+        {editMode ? (
+          <>
+            <span className={styles.dragHandle}>⠿</span>
+            <span className={styles.abbrText}>{displayName || '+'}</span>
+          </>
+        ) : (
+          exerciseName ? displayName : '+'
+        )}
+      </div>
+      {pickerOpen && (
+        <ExercisePicker
+          value={exerciseName}
+          onSelect={onChange}
+          onClose={() => setPickerOpen(false)}
+        />
       )}
-    </div>
+    </>
   );
 }
 

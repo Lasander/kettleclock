@@ -248,12 +248,16 @@ export function WorkoutBuilder({ onStart }: Props) {
         />
       </div>
 
-      <div className={styles.controlsRow}>
-        <NumberControl label="Sets" value={workout.setsCount} min={1} max={20} onChange={handleSetsChange} />
-        <NumberControl label="Ex / Set" value={workout.exercisesPerSet} min={1} max={12} onChange={handleExercisesPerSetChange} />
-        <NumberControl label="Exercise" value={workout.defaultExerciseDuration} min={1} max={300} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultExerciseDuration: v }))} />
-        <NumberControl label="Rest" value={workout.defaultExerciseRest} min={0} max={300} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultExerciseRest: v }))} />
-        <NumberControl label="Set Rest" value={workout.defaultSetRest} min={0} max={600} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultSetRest: v }))} />
+      <div className={styles.controlsGroup}>
+        <div className={styles.controlsRow}>
+          <NumberControl label="Sets" value={workout.setsCount} min={1} max={20} onChange={handleSetsChange} />
+          <NumberControl label="Ex / Set" value={workout.exercisesPerSet} min={1} max={12} onChange={handleExercisesPerSetChange} />
+        </div>
+        <div className={styles.controlsRow}>
+          <NumberControl label="Exercise" value={workout.defaultExerciseDuration} min={1} max={300} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultExerciseDuration: v }))} />
+          <NumberControl label="Rest" value={workout.defaultExerciseRest} min={0} max={300} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultExerciseRest: v }))} />
+          <NumberControl label="Set Rest" value={workout.defaultSetRest} min={0} max={600} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultSetRest: v }))} />
+        </div>
       </div>
 
       <div className={styles.gridSection}>

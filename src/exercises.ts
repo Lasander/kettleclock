@@ -82,3 +82,36 @@ export function getExercisesByMuscle(muscle: MuscleGroup): ExerciseDefinition[] 
   return EXERCISE_LIBRARY.filter((e) => e.primary === muscle || e.secondary === muscle);
 }
 
+/** Derive a short display name (≤10 chars) for grid cells */
+export function getShortName(name: string): string {
+  // Strip common prefixes
+  let short = name
+    .replace(/^Kettlebell\s+/, '')
+    .replace(/^KB\s+/, '');
+  // Already short enough
+  if (short.length <= 10) return short;
+  // Abbreviate words: keep first word, abbreviate subsequent
+  const words = short.split(/[\s-]+/);
+  if (words.length === 1) return short.slice(0, 10);
+  // Try dropping small words, then truncating
+  const abbr = words.map((w, i) => i === 0 ? w : w.slice(0, 3)).join(' ');
+  if (abbr.length <= 10) return abbr;
+  return words[0].slice(0, 10);
+}
+
+/** Determine equipment type from exercise name */
+export function getEquipmentType(name: string): 'kettlebell' | 'bodyweight' {
+  const def = exerciseMap.get(name);
+  if (!def) return 'bodyweight';
+  if (def.name.startsWith('Kettlebell ') ||
+      ['Goblet Squat', 'Turkish Get-Up', 'Clean & Press', 'Snatch', 'Figure 8'].includes(def.name)) {
+    return 'kettlebell';
+  }
+  return 'bodyweight';
+}
+
+// Pre-compute equipment type lookup
+export const EQUIPMENT_MAP = new Map<string, 'kettlebell' | 'bodyweight'>(
+  EXERCISE_LIBRARY.map((e) => [e.name, getEquipmentType(e.name)])
+);
+
