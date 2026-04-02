@@ -81,16 +81,23 @@ Hidden behind a toggle. Each exercise slot can optionally override its own durat
 - Set **number of sets** and **exercises per set** (sizes the grid)
 - **Number controls**: show a large readable number; tap to edit
 - **Visual exercise grid** (coloured rectangles):
-  - Tap a cell → pick exercise from library via native picker
+  - Tap any cell → opens the **Slot Editor** (full-screen overlay for assigning exercises)
   - Duplicate assignments flagged visually
   - **Long press any cell → enter reorder mode**; in reorder mode, drag any cell to any other position across the whole grid to swap
   - Tap a "Done" button or long-press again to exit reorder mode
-- **Quick Fill** menu:
-  - Fill manually (walk through empty slots one by one)
-  - Random
-  - Muscle group per set (each set targets one group)
-  - Alternate muscles (rotate groups within each set)
-  - Clear all
+- **Slot Editor** (full-screen overlay):
+  - **Slot strip**: horizontally scrollable row of all grid cells flattened across sets
+    - Set boundary labels (S1, S2, …) above each group of cells
+    - Visual dividers between sets
+    - Active slot highlighted with a red border
+    - Cells show muted muscle-group colours matching the main grid
+  - **Mode toggle**: "Fill Empty" (default) and "Overwrite All"
+    - Fill Empty: after selecting an exercise, auto-advances to the next empty slot; auto-closes when no empty slots remain
+    - Overwrite All: after selecting, advances to the next slot sequentially (wraps around); never auto-closes
+  - **Exercise list** below the strip: equipment filter, muscle group filter, scrollable list of enabled exercises with colour dots and in-set/in-grid indicators
+  - **Clear All** button in the header resets all slots to empty
+  - Tap any slot in the strip to jump to it directly
+  - Auto-advance wraps from the last slot back to the first
 - Default timing controls (exercise, rest, set rest)
 - Optional "Advanced timing" toggle for per-exercise overrides
 - Save / load / delete workouts (local storage)

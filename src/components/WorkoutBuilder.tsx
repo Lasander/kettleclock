@@ -7,9 +7,8 @@ import { generateId } from '../utils';
 import { resumeAudio } from '../audio';
 import { Logo } from './Logo';
 import { ExerciseCell } from './ExerciseCell';
-import { ExercisePicker } from './ExercisePicker';
 import { NumberControl } from './NumberControl';
-import { QuickFill } from './QuickFill';
+import { SlotEditor } from './SlotEditor';
 import styles from './WorkoutBuilder.module.css';
 
 interface Props {
@@ -96,67 +95,8 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
   const [newFlowStep, setNewFlowStep] = useState<'unsaved' | 'choose' | 'name' | null>(null);
   const [newWorkoutName, setNewWorkoutName] = useState('');
 
-  // Set-fill mode: when tapping a cell, fill the set starting from that cell, wrapping around
-  const [setFill, setSetFill] = useState<{ setIdx: number; order: number[]; pos: number } | null>(null);
-
-  const startSetFill = useCallback((setIdx: number, exIdx: number, perSet: number) => {
-    const order: number[] = [];
-    for (let i = 0; i < perSet; i++) order.push((exIdx + i) % perSet);
-    setSetFill({ setIdx, order, pos: 0 });
-  }, []);
-
-  const handleSetFillSelect = useCallback((name: string) => {
-    if (!setFill) return;
-    const { setIdx, order, pos } = setFill;
-    const exIdx = order[pos];
-    setWorkout((w) => {
-      const grid = w.grid.map((row) => [...row]);
-      grid[setIdx][exIdx] = { ...grid[setIdx][exIdx], exerciseName: name };
-      return { ...w, grid, updatedAt: Date.now() };
-    });
-    const nextPos = pos + 1;
-    if (nextPos >= order.length) {
-      setSetFill(null); // all slots in set filled
-    } else {
-      setSetFill({ setIdx, order, pos: nextPos });
-    }
-  }, [setFill]);
-
-  const setFillRemaining = setFill ? setFill.order.length - setFill.pos : 0;
-
-  // Manual fill mode: fill all empty cells across sets
-  const [manualFillSlot, setManualFillSlot] = useState<{ s: number; e: number } | null>(null);
-
-  const findNextEmptySlot = useCallback((grid: ExerciseSlot[][]): { s: number; e: number } | null => {
-    for (let s = 0; s < grid.length; s++) {
-      for (let e = 0; e < grid[s].length; e++) {
-        if (!grid[s][e].exerciseName) return { s, e };
-      }
-    }
-    return null;
-  }, []);
-
-  const handleStartManualFill = useCallback(() => {
-    setManualFillSlot(findNextEmptySlot(workout.grid));
-  }, [workout.grid, findNextEmptySlot]);
-
-  const handleManualFillSelect = useCallback((name: string) => {
-    if (!manualFillSlot) return;
-    const { s, e } = manualFillSlot;
-    setWorkout((w) => {
-      const grid = w.grid.map((row) => [...row]);
-      grid[s][e] = { ...grid[s][e], exerciseName: name };
-      const next = findNextEmptySlot(grid);
-      setManualFillSlot(next);
-      return { ...w, grid, updatedAt: Date.now() };
-    });
-  }, [manualFillSlot, findNextEmptySlot]);
-
-  const emptySlotCount = useMemo(() => {
-    let count = 0;
-    for (const row of workout.grid) for (const slot of row) if (!slot.exerciseName) count++;
-    return count;
-  }, [workout.grid]);
+  // SlotEditor state
+  const [slotEditor, setSlotEditor] = useState<{ setIdx: number; exIdx: number } | null>(null);
 
   // Edit mode (grid reorder)
   const [editMode, setEditMode] = useState(false);
@@ -216,12 +156,6 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
       map.set(String(s), dupes);
     }
     return map;
-  }, [workout.grid]);
-
-  const filledNames = useMemo(() => {
-    const names = new Set<string>();
-    workout.grid.forEach(row => row.forEach(slot => { if (slot.exerciseName) names.add(slot.exerciseName); }));
-    return names;
   }, [workout.grid]);
 
   // Detect whether current workout has unsaved changes
@@ -333,8 +267,12 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
     setDragTarget(null);
   }, [swapCells]);
 
-  const handleQuickFill = useCallback((grid: ExerciseSlot[][]) => {
-    updateWorkout((w) => ({ ...w, grid }));
+  const handleSlotUpdate = useCallback((setIdx: number, exIdx: number, exerciseName: string) => {
+    updateWorkout((w) => {
+      const grid = w.grid.map((row) => [...row]);
+      grid[setIdx][exIdx] = { ...grid[setIdx][exIdx], exerciseName };
+      return { ...w, grid };
+    });
   }, [updateWorkout]);
 
   const handleSave = () => {
@@ -487,7 +425,7 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
             >
               {editMode ? '✓ Done' : '↕ Reorder'}
             </button>
-            <QuickFill setsCount={workout.setsCount} exercisesPerSet={workout.exercisesPerSet} grid={workout.grid} onFill={handleQuickFill} onFillManual={handleStartManualFill} />
+
           </div>
         </div>
 
@@ -541,7 +479,7 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
                               isDuplicate={!!(slot.exerciseName && dupes?.has(slot.exerciseName))}
                               setIdx={s}
                               exIdx={e}
-                              onTap={() => startSetFill(s, e, workout.exercisesPerSet)}
+                              onTap={() => setSlotEditor({ setIdx: s, exIdx: e })}
                               editMode={editMode}
                               isSource={!!(dragSource && dragSource.s === s && dragSource.e === e)}
                               isTarget={!!(dragTarget && dragTarget.s === s && dragTarget.e === e && dragSource && (dragSource.s !== s || dragSource.e !== e))}
@@ -613,27 +551,14 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
         </button>
       </div>
 
-      {/* Exercise pickers */}
-      {setFill !== null && (
-        <ExercisePicker
-          value={workout.grid[setFill.setIdx]?.[setFill.order[setFill.pos]]?.exerciseName ?? ''}
-          title={`Exercises for set ${setFill.setIdx + 1} — ${setFillRemaining} remaining`}
-          filledNames={filledNames}
-          inSetNames={new Set(workout.grid[setFill.setIdx].map((s) => s.exerciseName).filter(Boolean) as string[])}
-          keepOpen
-          onSelect={handleSetFillSelect}
-          onClose={() => setSetFill(null)}
-        />
-      )}
-
-      {manualFillSlot !== null && setFill === null && (
-        <ExercisePicker
-          value=""
-          title={`Exercises for workout — ${emptySlotCount} remaining`}
-          filledNames={filledNames}
-          keepOpen
-          onSelect={handleManualFillSelect}
-          onClose={() => setManualFillSlot(null)}
+      {/* Slot editor */}
+      {slotEditor && (
+        <SlotEditor
+          grid={workout.grid}
+          initialSetIdx={slotEditor.setIdx}
+          initialExIdx={slotEditor.exIdx}
+          onUpdateSlot={handleSlotUpdate}
+          onClose={() => setSlotEditor(null)}
         />
       )}
 

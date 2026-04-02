@@ -36,10 +36,17 @@ kettleclock/
 │   │   ├── WorkoutBuilder.module.css
 │   │   ├── ExerciseCell.tsx        # Single coloured rectangle in grid
 │   │   ├── ExerciseCell.module.css
+│   │   ├── ExerciseLibrary.tsx     # Exercise library editor screen
+│   │   ├── ExerciseLibrary.module.css
+│   │   ├── ExercisePicker.tsx      # (unused, superseded by SlotEditor)
+│   │   ├── ExercisePicker.module.css
+│   │   ├── Logo.tsx                # App logo component
 │   │   ├── NumberControl.tsx       # Tap-to-edit number display
 │   │   ├── NumberControl.module.css
-│   │   ├── QuickFill.tsx           # Quick-fill popover menu
+│   │   ├── QuickFill.tsx           # (unused, superseded by SlotEditor)
 │   │   ├── QuickFill.module.css
+│   │   ├── SlotEditor.tsx          # Full-screen slot editor overlay
+│   │   ├── SlotEditor.module.css
 │   │   ├── Timer.tsx               # Active workout timer screen
 │   │   ├── Timer.module.css
 │   │   ├── Summary.tsx             # Post-workout summary
@@ -159,7 +166,7 @@ Simple state machine (no router library needed):
 - Timer screen goes near-fullscreen (hides builder chrome)
 - CSS `env(safe-area-inset-*)` for notched phones
 - **Number controls**: show large value by default; tap to reveal edit input
-- **Grid cells**: tap to assign, touch-drag to reorder within a set
+- **Grid cells**: tap to open Slot Editor, touch-drag to reorder within a set
 - CSS avoids features unsupported on mobile Safari (e.g. `color-mix` → use hex fallbacks)
 
 ## Audio Strategy
