@@ -73,11 +73,28 @@ function migrateWorkout(w: any): Workout {
   };
 }
 
+/** Does the grid contain any assigned exercises? */
+function gridHasExercises(grid: ExerciseSlot[][]): boolean {
+  return grid.some((row) => row.some((s) => !!s.exerciseName));
+}
+
 export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
   const [workout, setWorkout] = useState<Workout>(newWorkout);
   const [saved, setSaved] = useState<Workout[]>([]);
   const [showOverrides, setShowOverrides] = useState(false);
   const [showSavedPanel, setShowSavedPanel] = useState(false);
+
+  // Track the last-saved version to detect unsaved changes
+  const [lastSavedId, setLastSavedId] = useState<string | null>(null);
+  const [lastSavedUpdatedAt, setLastSavedUpdatedAt] = useState<number | null>(null);
+
+  // Hamburger menu
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // New workout flow
+  const [newFlowStep, setNewFlowStep] = useState<'unsaved' | 'choose' | 'name' | null>(null);
+  const [newWorkoutName, setNewWorkoutName] = useState('');
 
   // Set-fill mode: when tapping a cell, fill the set starting from that cell, wrapping around
   const [setFill, setSetFill] = useState<{ setIdx: number; order: number[]; pos: number } | null>(null);
@@ -170,6 +187,22 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
     setSaved(loadWorkouts());
   }, []);
 
+  // Close hamburger menu on outside click/tap
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: MouseEvent | TouchEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, [menuOpen]);
+
   const refreshSaved = () => setSaved(loadWorkouts());
 
   const duplicatesMap = useMemo(() => {
@@ -190,6 +223,47 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
     workout.grid.forEach(row => row.forEach(slot => { if (slot.exerciseName) names.add(slot.exerciseName); }));
     return names;
   }, [workout.grid]);
+
+  // Detect whether current workout has unsaved changes
+  const hasUnsavedChanges = useMemo(() => {
+    if (!gridHasExercises(workout.grid)) return false;
+    if (lastSavedId === null) return true; // never saved
+    return workout.updatedAt !== lastSavedUpdatedAt;
+  }, [workout.grid, workout.updatedAt, lastSavedId, lastSavedUpdatedAt]);
+
+  // ── Auto-save: save on every meaningful edit ─────────────────────────
+  const autoSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const doAutoSave = useCallback(() => {
+    setWorkout((w) => {
+      // Determine name for auto-save
+      let name = w.name;
+      if (!name) {
+        name = 'Untitled';
+      }
+      // If this workout was loaded from a saved one, append * if name doesn't already have it
+      if (lastSavedId && w.id === lastSavedId && !name.endsWith('*')) {
+        name = name + '*';
+      }
+      const toSave = { ...w, name };
+      saveWorkout(toSave);
+      setLastSavedId(toSave.id);
+      setLastSavedUpdatedAt(toSave.updatedAt);
+      return name !== w.name ? toSave : w;
+    });
+    refreshSaved();
+  }, [lastSavedId]);
+
+  // Trigger auto-save when grid changes (debounced)
+  const prevGridRef = useRef(workout.grid);
+  useEffect(() => {
+    if (workout.grid === prevGridRef.current) return;
+    prevGridRef.current = workout.grid;
+    if (!gridHasExercises(workout.grid)) return;
+    if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
+    autoSaveRef.current = setTimeout(doAutoSave, 800);
+    return () => { if (autoSaveRef.current) clearTimeout(autoSaveRef.current); };
+  }, [workout.grid, doAutoSave]);
 
   const updateWorkout = useCallback((updater: (w: Workout) => Workout) => {
     setWorkout((w) => ({ ...updater(w), updatedAt: Date.now() }));
@@ -264,12 +338,24 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
   }, [updateWorkout]);
 
   const handleSave = () => {
-    saveWorkout(workout);
+    const toSave = { ...workout, updatedAt: Date.now() };
+    // Strip trailing * from auto-save names
+    if (toSave.name.endsWith('*')) {
+      toSave.name = toSave.name.slice(0, -1);
+    }
+    saveWorkout(toSave);
+    setWorkout(toSave);
+    setLastSavedId(toSave.id);
+    setLastSavedUpdatedAt(toSave.updatedAt);
     refreshSaved();
+    setMenuOpen(false);
   };
 
   const handleLoad = (w: Workout) => {
-    setWorkout(migrateWorkout(w));
+    const loaded = migrateWorkout(w);
+    setWorkout(loaded);
+    setLastSavedId(loaded.id);
+    setLastSavedUpdatedAt(loaded.updatedAt);
     setShowOverrides(false);
     setEditMode(false);
   };
@@ -279,41 +365,104 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
     refreshSaved();
   };
 
-  const handleNew = () => {
-    setWorkout(newWorkout());
+  // ── New workout flow ─────────────────────────────────────────────────
+  const initiateNew = () => {
+    setMenuOpen(false);
+    if (hasUnsavedChanges) {
+      setNewFlowStep('unsaved');
+    } else {
+      setNewFlowStep('choose');
+    }
+  };
+
+  const proceedToChoose = () => {
+    setNewFlowStep('choose');
+  };
+
+  const createEmpty = () => {
+    setNewFlowStep('name');
+    setNewWorkoutName('');
+  };
+
+  const confirmNewEmpty = () => {
+    const w = newWorkout();
+    w.name = newWorkoutName.trim() || '';
+    setWorkout(w);
+    setLastSavedId(null);
+    setLastSavedUpdatedAt(null);
     setShowOverrides(false);
     setEditMode(false);
+    setNewFlowStep(null);
+  };
+
+  const duplicateFromSaved = (w: Workout) => {
+    const dup = migrateWorkout(w);
+    dup.id = generateId();
+    dup.name = (dup.name || 'Untitled') + ' (copy)';
+    dup.createdAt = Date.now();
+    dup.updatedAt = Date.now();
+    setWorkout(dup);
+    setLastSavedId(null);
+    setLastSavedUpdatedAt(null);
+    setShowOverrides(false);
+    setEditMode(false);
+    setNewFlowStep(null);
   };
 
   const canStart = workout.setsCount > 0 && workout.exercisesPerSet > 0;
 
   return (
     <div className={styles.container}>
-      {/* Header / logo */}
+      {/* Header with logo + hamburger */}
       <div className={styles.header}>
         <Logo size={48} />
         <h1 className={styles.title}>KettleClock</h1>
+        <div className={styles.menuWrapper} ref={menuRef}>
+          <button
+            className={styles.hamburger}
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label="Menu"
+          >
+            <span className={styles.hamburgerBar} />
+            <span className={styles.hamburgerBar} />
+            <span className={styles.hamburgerBar} />
+          </button>
+          {menuOpen && (
+            <div className={styles.menu}>
+              <button className={styles.menuItem} onClick={handleSave}>
+                💾 Save
+              </button>
+              <button className={styles.menuItem} onClick={initiateNew}>
+                ✨ New Workout
+              </button>
+              <button className={styles.menuItem} onClick={() => { setShowSavedPanel(true); setMenuOpen(false); }}>
+                📂 Saved Workouts{saved.length > 0 ? ` (${saved.length})` : ''}
+              </button>
+              <div className={styles.menuSep} />
+              <button className={styles.menuItem} onClick={() => { setShowOverrides((s) => !s); setMenuOpen(false); }}>
+                ⏱ {showOverrides ? 'Hide' : 'Per-exercise'} Timing
+              </button>
+              <button className={styles.menuItem} onClick={() => { onEditExercises(); setMenuOpen(false); }}>
+                📋 Exercise Library
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Saved panel trigger is in the name row below */}
-
+      {/* Workout name */}
       <div className={styles.nameSection}>
-        <div className={styles.nameRow}>
-          <input
-            className={styles.nameInput}
-            type="text"
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            value={workout.name}
-            onChange={(e) => updateWorkout((w) => ({ ...w, name: e.target.value }))}
-            placeholder="Workout name"
-          />
-          <button className={styles.savedBtn} onClick={() => setShowSavedPanel(true)}>
-            Saved{saved.length > 0 ? ` (${saved.length})` : ''}
-          </button>
-        </div>
+        <input
+          className={styles.nameInput}
+          type="text"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          value={workout.name}
+          onChange={(e) => updateWorkout((w) => ({ ...w, name: e.target.value }))}
+          placeholder="Workout name"
+        />
       </div>
 
       <div className={styles.controlsGroup}>
@@ -331,7 +480,15 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
       <div className={styles.gridSection}>
         <div className={styles.gridHeader}>
           <span className={styles.gridLabel}>Exercise Grid</span>
-          <QuickFill setsCount={workout.setsCount} exercisesPerSet={workout.exercisesPerSet} grid={workout.grid} onFill={handleQuickFill} onFillManual={handleStartManualFill} />
+          <div className={styles.gridActions}>
+            <button
+              className={`${styles.reorderBtn}${editMode ? ` ${styles.reorderBtnActive}` : ''}`}
+              onClick={() => setEditMode((m) => !m)}
+            >
+              {editMode ? '✓ Done' : '↕ Reorder'}
+            </button>
+            <QuickFill setsCount={workout.setsCount} exercisesPerSet={workout.exercisesPerSet} grid={workout.grid} onFill={handleQuickFill} onFillManual={handleStartManualFill} />
+          </div>
         </div>
 
         <div className={styles.legend}>
@@ -353,7 +510,6 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
         >
           {workout.grid.map((row, s) => {
             const dupes = duplicatesMap.get(String(s));
-            // Balanced row splitting: determine rows needed, then distribute evenly
             const numRows = Math.ceil(row.length / maxPerRow);
             const base = Math.floor(row.length / numRows);
             const extra = row.length % numRows;
@@ -402,21 +558,6 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
         </div>
       </div>
 
-      <div className={styles.toolbar}>
-        <button
-          className={`${styles.toggleBtn}${editMode ? ` ${styles.toggleBtnActive}` : ''}`}
-          onClick={() => setEditMode((m) => !m)}
-        >
-          {editMode ? '✓ Done Reordering' : '↕ Reorder'}
-        </button>
-        <button className={styles.toggleBtn} onClick={() => setShowOverrides((s) => !s)}>
-          {showOverrides ? 'Hide overrides ▴' : 'Per-exercise timing ▾'}
-        </button>
-        <button className={styles.toggleBtn} onClick={onEditExercises}>
-          📋 Exercises
-        </button>
-      </div>
-
       {showOverrides && (
         <div className={styles.overridesSection}>
           <div className={styles.overridesTitle}>Per-Exercise Overrides</div>
@@ -461,9 +602,8 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
         </div>
       )}
 
+      {/* Start button — always visible at bottom */}
       <div className={styles.actions}>
-        <button className={styles.saveBtn} onClick={handleSave}>Save</button>
-        <button className={styles.saveBtn} onClick={handleNew}>New</button>
         <button
           className={styles.startBtn}
           onClick={() => { resumeAudio(); onStart(workout); }}
@@ -473,6 +613,7 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
         </button>
       </div>
 
+      {/* Exercise pickers */}
       {setFill !== null && (
         <ExercisePicker
           value={workout.grid[setFill.setIdx]?.[setFill.order[setFill.pos]]?.exerciseName ?? ''}
@@ -496,6 +637,7 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
         />
       )}
 
+      {/* Saved workouts panel */}
       {showSavedPanel && (
         <div className={styles.savedOverlay} onClick={() => setShowSavedPanel(false)}>
           <div className={styles.savedPanel} onClick={(e) => e.stopPropagation()}>
@@ -516,6 +658,80 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
                 </div>
               ))
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── New workout flow dialogs ──────────────────────────────────── */}
+
+      {/* Step 1: unsaved changes warning */}
+      {newFlowStep === 'unsaved' && (
+        <div className={styles.dialogOverlay} onClick={() => setNewFlowStep(null)}>
+          <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
+            <p className={styles.dialogTitle}>Unsaved Changes</p>
+            <p className={styles.dialogBody}>Your current workout has unsaved changes. Continue?</p>
+            <div className={styles.dialogBtns}>
+              <button className={styles.dialogCancel} onClick={() => setNewFlowStep(null)}>Cancel</button>
+              <button className={styles.dialogConfirm} onClick={proceedToChoose}>Continue</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Step 2: choose empty or duplicate */}
+      {newFlowStep === 'choose' && (
+        <div className={styles.dialogOverlay} onClick={() => setNewFlowStep(null)}>
+          <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
+            <p className={styles.dialogTitle}>New Workout</p>
+            <div className={styles.dialogChoices}>
+              <button className={styles.dialogChoiceBtn} onClick={createEmpty}>
+                🆕 Empty Workout
+              </button>
+              {saved.length > 0 && (
+                <>
+                  <div className={styles.dialogChoiceDivider}>or duplicate</div>
+                  <div className={styles.dialogChoiceList}>
+                    {saved.map((w) => (
+                      <button
+                        key={w.id}
+                        className={styles.dialogChoiceItem}
+                        onClick={() => duplicateFromSaved(w)}
+                      >
+                        {w.name || 'Untitled'}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+            <div className={styles.dialogBtns}>
+              <button className={styles.dialogCancel} onClick={() => setNewFlowStep(null)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Step 3: name prompt for empty workout */}
+      {newFlowStep === 'name' && (
+        <div className={styles.dialogOverlay} onClick={() => setNewFlowStep(null)}>
+          <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
+            <p className={styles.dialogTitle}>Workout Name</p>
+            <input
+              className={styles.dialogInput}
+              type="text"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              value={newWorkoutName}
+              onChange={(e) => setNewWorkoutName(e.target.value)}
+              placeholder="e.g. Morning Kettlebell"
+              autoFocus
+              onKeyDown={(e) => { if (e.key === 'Enter') confirmNewEmpty(); }}
+            />
+            <div className={styles.dialogBtns}>
+              <button className={styles.dialogCancel} onClick={() => setNewFlowStep('choose')}>Back</button>
+              <button className={styles.dialogConfirm} onClick={confirmNewEmpty}>Create</button>
+            </div>
           </div>
         </div>
       )}

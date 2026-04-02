@@ -16,6 +16,70 @@
   top: 0;
   z-index: 10;
   background: var(--color-bg);
+  position: relative;
+}
+
+/* ── Hamburger menu ─────────────────────────────────────────────────── */
+.menuWrapper {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.hamburgerBar {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--color-text);
+  border-radius: 1px;
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-lg);
+  padding: 6px 0;
+  min-width: 200px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  z-index: 100;
+}
+
+.menuItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 18px;
+  font-size: 0.9rem;
+  background: transparent;
+  color: var(--color-text);
+  border: none;
+  cursor: pointer;
+}
+
+.menuItem:active {
+  background: var(--color-surface);
+}
+
+.menuSep {
+  height: 0.5px;
+  background: var(--color-separator);
+  margin: 4px 0;
 }
 
 .title {
@@ -142,30 +206,12 @@
   margin-bottom: 20px;
 }
 
-.nameRow {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
 .nameInput {
-  flex: 1;
+  width: 100%;
   min-width: 0;
   font-size: 1rem;
   background: var(--color-surface);
   border-radius: var(--radius);
-}
-
-.savedBtn {
-  background: var(--color-surface);
-  color: var(--color-text-muted);
-  font-size: 0.8rem;
-  padding: 0 14px;
-  border-radius: var(--radius);
-  white-space: nowrap;
-  flex-shrink: 0;
-  min-height: 44px;
-  border: none;
 }
 
 .controlsGroup {
@@ -202,6 +248,27 @@
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.gridActions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.reorderBtn {
+  background: var(--color-surface-elevated);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  padding: 5px 10px;
+  min-height: 28px;
+  border: none;
+  border-radius: 14px;
+}
+
+.reorderBtnActive {
+  background: var(--color-primary);
+  color: white;
 }
 
 .legend {
@@ -280,27 +347,7 @@
   justify-content: center;
 }
 
-.toolbar {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-
-.toggleBtn {
-  background: var(--color-surface);
-  color: var(--color-text-muted);
-  font-size: 0.82rem;
-  padding: 9px 16px;
-  min-height: 36px;
-  border: none;
-  border-radius: 20px;
-}
-
-.toggleBtnActive {
-  background: var(--color-primary);
-  color: white;
-}
+/* (toolbar removed — actions now in hamburger menu + grid header) */
 
 .overridesSection {
   margin-bottom: 16px;
@@ -374,10 +421,126 @@
   cursor: not-allowed;
 }
 
-.saveBtn {
+/* ── Dialog overlays (new workout flow) ─────────────────────────────── */
+.dialogOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  padding: 24px;
+}
+
+.dialog {
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.dialogTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.dialogBody {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin: 0 0 20px;
+}
+
+.dialogBtns {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.dialogCancel {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  border: none;
+}
+
+.dialogConfirm {
+  background: var(--color-primary);
+  color: white;
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  border: none;
+}
+
+.dialogChoices {
+  margin-bottom: 16px;
+}
+
+.dialogChoiceBtn {
+  display: block;
+  width: 100%;
   background: var(--color-surface);
   color: var(--color-text);
-  padding: 15px 18px;
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  border-radius: var(--radius);
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dialogChoiceBtn:active {
+  background: var(--color-surface-elevated);
+}
+
+.dialogChoiceDivider {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+  padding: 10px 0 6px;
+}
+
+.dialogChoiceList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dialogChoiceItem {
+  display: block;
+  width: 100%;
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 12px 16px;
   font-size: 0.9rem;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius);
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dialogChoiceItem:active {
+  background: var(--color-surface-elevated);
+}
+
+.dialogInput {
+  width: 100%;
+  font-size: 1rem;
+  padding: 12px;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  border: none;
+  color: var(--color-text);
 }
