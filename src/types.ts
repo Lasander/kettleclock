@@ -49,26 +49,26 @@ export const MUSCLE_ORDER: MuscleGroup[] = [
 ];
 
 export const MUSCLE_COLORS: Record<MuscleGroup, string> = {
-  legs:      '#34d399', // green
-  core:      '#c4f000', // lime
-  cardio:    '#ffd43b', // amber
-  fullBody:  '#ff8a65', // orange
-  arms:      '#ff7eb3', // pink
-  chest:     '#e879f9', // magenta
-  shoulders: '#a78bfa', // violet
-  back:      '#60b5ff', // blue
+  legs:      '#2dd4a0', // emerald green
+  core:      '#a3e635', // lime
+  cardio:    '#fbbf24', // amber
+  fullBody:  '#f97316', // orange
+  arms:      '#f43f5e', // crimson rose
+  chest:     '#d946ef', // fuchsia
+  shoulders: '#6366f1', // indigo
+  back:      '#38bdf8', // sky blue
 };
 
-/** Muted/darker variants for grid cell backgrounds (better white text contrast) */
+/** Medium-brightness variants for grid cell backgrounds (readable white text, clear hue) */
 export const MUSCLE_COLORS_MUTED: Record<MuscleGroup, string> = {
-  legs:      '#1a7a52',
-  core:      '#6a8500',
-  cardio:    '#8a7000',
-  fullBody:  '#8a4a2a',
-  arms:      '#8a3a5a',
-  chest:     '#7a3a8a',
-  shoulders: '#5a4580',
-  back:      '#2a5a8a',
+  legs:      '#1a7a52', // forest green
+  core:      '#507714', // olive
+  cardio:    '#856d13', // dark gold
+  fullBody:  '#984018', // burnt sienna
+  arms:      '#8f2a3e', // deep cranberry
+  chest:     '#7f2d90', // purple
+  shoulders: '#3a3e94', // indigo
+  back:      '#1d5f87', // ocean
 };
 
 export const MUSCLE_LABELS: Record<MuscleGroup, string> = {

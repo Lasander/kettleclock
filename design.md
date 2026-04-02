@@ -91,15 +91,18 @@ Each exercise cell is a ~50–60 px square showing:
 - **Diagonal split** (45° linear-gradient) when exercise has two muscle groups
 - **Grey** (#555) for empty/unassigned slots
 
-Muscle group colour map:
-| Group | Colour | Hex |
-|---|---|---|
-| Legs | Green | #2ecc71 |
-| Back | Blue | #3498db |
-| Shoulders | Amber | #f39c12 |
-| Core | Orange | #e67e22 |
-| Full Body | Red | #e74c3c |
-| Empty | Grey | #555555 |
+Muscle group colour map (vibrant / muted):
+| Group | Colour | Vibrant | Muted |
+|---|---|---|---|
+| Legs | Emerald green | #2dd4a0 | #1a7a52 |
+| Core | Lime | #a3e635 | #507714 |
+| Cardio | Amber | #fbbf24 | #856d13 |
+| Full Body | Orange | #f97316 | #984018 |
+| Arms | Crimson rose | #f43f5e | #8f2a3e |
+| Chest | Fuchsia | #d946ef | #7f2d90 |
+| Shoulders | Indigo | #6366f1 | #3a3e94 |
+| Back | Sky blue | #38bdf8 | #1d5f87 |
+| Empty | Grey | #555555 | — |
 
 ## Timer Engine
 
