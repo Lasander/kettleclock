@@ -28,7 +28,7 @@ A workout is a **grid** of `S` sets × `E` exercises per set. Each cell is an ex
 ### Exercise Library
 
 A unified library of **kettlebell and bodyweight exercises**, combining built-in defaults with user-created entries. Each exercise has:
-- Full name and **abbreviation** (2–3 letters)
+- Full name
 - **Primary muscle group** (and optional secondary)
 - **Equipment type**: `kettlebell` or `bodyweight`
 - **Built-in flag**: whether the exercise ships with the app or was user-created
@@ -53,7 +53,7 @@ Eight groups arranged on a colour spectrum so adjacent groups share adjacent hue
 
 ### Visual Grid
 
-Each exercise cell is a **coloured rectangle** showing its abbreviation:
+Each exercise cell is a **coloured rectangle** showing a short name:
 - Background colour from primary muscle group
 - **Diagonal split** for exercises with a secondary muscle group
 - **Grey** for empty/unassigned slots
@@ -102,7 +102,7 @@ Accessible from the Setup phase via a dedicated button. Manages the full list of
 
 #### Viewing
 - Shows all exercises (defaults + custom) in a scrollable list
-- Each row shows: colour dot(s) for muscle groups, name, abbreviation, equipment icon, and an enable/disable toggle
+- Each row shows: colour dot(s) for muscle groups, name, equipment icon, and an enable/disable toggle
 - Filterable by equipment type (Kettlebell / Bodyweight) and muscle group, same as the exercise picker
 
 #### Adding Exercises
@@ -110,7 +110,6 @@ Accessible from the Setup phase via a dedicated button. Manages the full list of
 - **Duplicate button** on any existing exercise creates a copy with "(copy)" appended, ready for editing
 - New exercise form fields:
   - Name (required, must be unique)
-  - Abbreviation (2–3 characters, auto-suggested from name)
   - Primary muscle group (required, select from the eight groups)
   - Secondary muscle group (optional)
   - Equipment type (kettlebell or bodyweight)

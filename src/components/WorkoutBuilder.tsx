@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import type { Workout, ExerciseSlot } from '../types';
 import { MUSCLE_COLORS, MUSCLE_LABELS, MUSCLE_ORDER } from '../types';
-import { getExerciseDef } from '../exercises';
+import { getShortName } from '../exercises';
 import { loadWorkouts, saveWorkout, deleteWorkout } from '../storage';
 import { generateId } from '../utils';
 import { resumeAudio } from '../audio';
@@ -564,7 +564,7 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
           {workout.grid.map((row, s) =>
             row.map((slot, eIdx) => {
               const label = slot.exerciseName
-                ? `S${s + 1} E${eIdx + 1}: ${getExerciseDef(slot.exerciseName)?.abbr ?? slot.exerciseName}`
+                ? `S${s + 1} E${eIdx + 1}: ${getShortName(slot.exerciseName)}`
                 : `S${s + 1} E${eIdx + 1}: (empty)`;
               return (
                 <div key={slot.id} className={styles.overrideRow}>

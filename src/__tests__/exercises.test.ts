@@ -9,7 +9,6 @@ import {
   deleteExercise,
   toggleExerciseEnabled,
   isNameTaken,
-  suggestAbbr,
   getShortName,
 } from '../exercises';
 import type { ExerciseDefinition } from '../types';
@@ -27,7 +26,6 @@ describe('exercises', () => {
     it('all exercises have required fields', () => {
       for (const ex of getExerciseLibrary()) {
         expect(ex.name).toBeTruthy();
-        expect(ex.abbr).toBeTruthy();
         expect(ex.primary).toBeTruthy();
         expect(typeof ex.builtin).toBe('boolean');
         expect(typeof ex.enabled).toBe('boolean');
@@ -54,7 +52,6 @@ describe('exercises', () => {
     it('returns a known exercise by name', () => {
       const ex = getExerciseDef('Kettlebell Swing');
       expect(ex).toBeDefined();
-      expect(ex!.abbr).toBe('SW');
       expect(ex!.primary).toBe('back');
     });
 
@@ -99,7 +96,6 @@ describe('exercises', () => {
     it('saves a new custom exercise and retrieves it', () => {
       const ex: ExerciseDefinition = {
         name: customName,
-        abbr: 'TST',
         primary: 'core',
         equipment: 'bodyweight',
         builtin: false,
@@ -108,13 +104,11 @@ describe('exercises', () => {
       saveExercise(ex);
       const found = getExerciseDef(customName);
       expect(found).toBeDefined();
-      expect(found!.abbr).toBe('TST');
     });
 
     it('updates an existing exercise by old name', () => {
       const ex: ExerciseDefinition = {
         name: customName,
-        abbr: 'TST',
         primary: 'core',
         equipment: 'bodyweight',
         builtin: false,
@@ -122,16 +116,15 @@ describe('exercises', () => {
       };
       saveExercise(ex);
 
-      const renamed: ExerciseDefinition = { ...ex, name: customName + '_renamed', abbr: 'RN' };
+      const renamed: ExerciseDefinition = { ...ex, name: customName + '_renamed' };
       updateExercise(customName, renamed);
       expect(getExerciseDef(customName)).toBeUndefined();
-      expect(getExerciseDef(customName + '_renamed')?.abbr).toBe('RN');
+      expect(getExerciseDef(customName + '_renamed')).toBeDefined();
     });
 
     it('deletes a custom exercise', () => {
       const ex: ExerciseDefinition = {
         name: customName,
-        abbr: 'TST',
         primary: 'core',
         equipment: 'bodyweight',
         builtin: false,
@@ -185,28 +178,6 @@ describe('exercises', () => {
 
     it('excludes a given name from the check', () => {
       expect(isNameTaken('Kettlebell Swing', 'Kettlebell Swing')).toBe(false);
-    });
-  });
-
-  describe('suggestAbbr', () => {
-    it('abbreviates single word to first 3 chars uppercase', () => {
-      expect(suggestAbbr('Plank')).toBe('PLA');
-    });
-
-    it('abbreviates multi-word to initials uppercase', () => {
-      expect(suggestAbbr('Goblet Squat')).toBe('GS');
-    });
-
-    it('strips "Kettlebell" prefix before abbreviating', () => {
-      expect(suggestAbbr('Kettlebell Halo')).toBe('HAL');
-    });
-
-    it('limits to 3 characters', () => {
-      expect(suggestAbbr('One Two Three Four').length).toBeLessThanOrEqual(3);
-    });
-
-    it('returns empty string for empty input', () => {
-      expect(suggestAbbr('')).toBe('');
     });
   });
 

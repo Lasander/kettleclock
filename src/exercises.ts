@@ -12,58 +12,58 @@ import type { ExerciseDefinition, MuscleGroup } from './types';
 
 const DEFAULT_EXERCISES: Omit<ExerciseDefinition, 'builtin' | 'enabled'>[] = [
   // -- Kettlebell exercises --
-  { name: 'Kettlebell Swing',               abbr: 'SW',  primary: 'back',      secondary: 'legs',      equipment: 'kettlebell' },
-  { name: 'Goblet Squat',                   abbr: 'GS',  primary: 'legs',                               equipment: 'kettlebell' },
-  { name: 'Turkish Get-Up',                 abbr: 'TGU', primary: 'fullBody',                            equipment: 'kettlebell' },
-  { name: 'Clean & Press',                  abbr: 'C&P', primary: 'fullBody',                            equipment: 'kettlebell' },
-  { name: 'Snatch',                         abbr: 'SN',  primary: 'fullBody',                            equipment: 'kettlebell' },
-  { name: 'Kettlebell Row',                 abbr: 'RW',  primary: 'back',                                equipment: 'kettlebell' },
-  { name: 'Kettlebell Deadlift',            abbr: 'DL',  primary: 'back',      secondary: 'legs',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Halo',                abbr: 'HL',  primary: 'shoulders', secondary: 'core',      equipment: 'kettlebell' },
-  { name: 'Figure 8',                       abbr: 'F8',  primary: 'core',      secondary: 'legs',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Windmill',            abbr: 'WM',  primary: 'core',      secondary: 'shoulders', equipment: 'kettlebell' },
-  { name: 'Kettlebell Thruster',            abbr: 'TH',  primary: 'fullBody',                            equipment: 'kettlebell' },
-  { name: 'Kettlebell Lunge',               abbr: 'LU',  primary: 'legs',                               equipment: 'kettlebell' },
-  { name: 'Kettlebell Clean',               abbr: 'CL',  primary: 'fullBody',                            equipment: 'kettlebell' },
-  { name: 'Kettlebell Press',               abbr: 'PR',  primary: 'shoulders',                           equipment: 'kettlebell' },
-  { name: 'Kettlebell High Pull',           abbr: 'HP',  primary: 'back',      secondary: 'shoulders', equipment: 'kettlebell' },
-  { name: 'Kettlebell Sumo Squat',          abbr: 'SS',  primary: 'legs',                               equipment: 'kettlebell' },
-  { name: 'Kettlebell Front Squat',         abbr: 'FS',  primary: 'legs',                               equipment: 'kettlebell' },
-  { name: 'Kettlebell Farmer Walk',         abbr: 'FW',  primary: 'core',      secondary: 'back',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Renegade Row',        abbr: 'RR',  primary: 'back',      secondary: 'core',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Around the World',    abbr: 'AW',  primary: 'core',      secondary: 'shoulders', equipment: 'kettlebell' },
-  { name: 'Kettlebell Single-Leg Deadlift', abbr: 'SD',  primary: 'legs',      secondary: 'back',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Floor Press',         abbr: 'FP',  primary: 'chest',                              equipment: 'kettlebell' },
-  { name: 'Kettlebell Crush Curl',          abbr: 'CC',  primary: 'arms',                               equipment: 'kettlebell' },
-  { name: 'Kettlebell Bent Press',          abbr: 'BP',  primary: 'shoulders', secondary: 'core',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Overhead Carry',      abbr: 'OC',  primary: 'shoulders', secondary: 'core',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Bob & Weave',         abbr: 'BW',  primary: 'legs',      secondary: 'core',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Side Lunge',          abbr: 'SL',  primary: 'legs',                               equipment: 'kettlebell' },
-  { name: 'Kettlebell Push Press',          abbr: 'PP',  primary: 'shoulders', secondary: 'legs',      equipment: 'kettlebell' },
+  { name: 'Kettlebell Swing',               primary: 'back',      secondary: 'legs',      equipment: 'kettlebell' },
+  { name: 'Goblet Squat',                   primary: 'legs',                               equipment: 'kettlebell' },
+  { name: 'Turkish Get-Up',                 primary: 'fullBody',                            equipment: 'kettlebell' },
+  { name: 'Clean & Press',                  primary: 'fullBody',                            equipment: 'kettlebell' },
+  { name: 'Snatch',                         primary: 'fullBody',                            equipment: 'kettlebell' },
+  { name: 'Kettlebell Row',                 primary: 'back',                                equipment: 'kettlebell' },
+  { name: 'Kettlebell Deadlift',            primary: 'back',      secondary: 'legs',      equipment: 'kettlebell' },
+  { name: 'Kettlebell Halo',                primary: 'shoulders', secondary: 'core',      equipment: 'kettlebell' },
+  { name: 'Figure 8',                       primary: 'core',      secondary: 'legs',      equipment: 'kettlebell' },
+  { name: 'Kettlebell Windmill',            primary: 'core',      secondary: 'shoulders', equipment: 'kettlebell' },
+  { name: 'Kettlebell Thruster',            primary: 'fullBody',                            equipment: 'kettlebell' },
+  { name: 'Kettlebell Lunge',               primary: 'legs',                               equipment: 'kettlebell' },
+  { name: 'Kettlebell Clean',               primary: 'fullBody',                            equipment: 'kettlebell' },
+  { name: 'Kettlebell Press',               primary: 'shoulders',                           equipment: 'kettlebell' },
+  { name: 'Kettlebell High Pull',           primary: 'back',      secondary: 'shoulders', equipment: 'kettlebell' },
+  { name: 'Kettlebell Sumo Squat',          primary: 'legs',                               equipment: 'kettlebell' },
+  { name: 'Kettlebell Front Squat',         primary: 'legs',                               equipment: 'kettlebell' },
+  { name: 'Kettlebell Farmer Walk',         primary: 'core',      secondary: 'back',      equipment: 'kettlebell' },
+  { name: 'Kettlebell Renegade Row',        primary: 'back',      secondary: 'core',      equipment: 'kettlebell' },
+  { name: 'Kettlebell Around the World',    primary: 'core',      secondary: 'shoulders', equipment: 'kettlebell' },
+  { name: 'Kettlebell Single-Leg Deadlift', primary: 'legs',      secondary: 'back',      equipment: 'kettlebell' },
+  { name: 'Kettlebell Floor Press',         primary: 'chest',                              equipment: 'kettlebell' },
+  { name: 'Kettlebell Crush Curl',          primary: 'arms',                               equipment: 'kettlebell' },
+  { name: 'Kettlebell Bent Press',          primary: 'shoulders', secondary: 'core',      equipment: 'kettlebell' },
+  { name: 'Kettlebell Overhead Carry',      primary: 'shoulders', secondary: 'core',      equipment: 'kettlebell' },
+  { name: 'Kettlebell Bob & Weave',         primary: 'legs',      secondary: 'core',      equipment: 'kettlebell' },
+  { name: 'Kettlebell Side Lunge',          primary: 'legs',                               equipment: 'kettlebell' },
+  { name: 'Kettlebell Push Press',          primary: 'shoulders', secondary: 'legs',      equipment: 'kettlebell' },
 
   // -- Bodyweight exercises --
-  { name: 'Plank',                          abbr: 'PL',  primary: 'core',                              equipment: 'bodyweight' },
-  { name: 'Side Plank',                     abbr: 'SP',  primary: 'core',                              equipment: 'bodyweight' },
-  { name: 'Push-Up',                        abbr: 'PU',  primary: 'chest',     secondary: 'arms',      equipment: 'bodyweight' },
-  { name: 'Wide Push-Up',                   abbr: 'WP',  primary: 'chest',                              equipment: 'bodyweight' },
-  { name: 'Diamond Push-Up',               abbr: 'DP',  primary: 'arms',      secondary: 'chest',     equipment: 'bodyweight' },
-  { name: 'Pull-Up',                        abbr: 'PUL', primary: 'back',      secondary: 'arms',      equipment: 'bodyweight' },
-  { name: 'Chin-Up',                        abbr: 'CU',  primary: 'arms',      secondary: 'back',      equipment: 'bodyweight' },
-  { name: 'Dip',                            abbr: 'DI',  primary: 'chest',     secondary: 'arms',      equipment: 'bodyweight' },
-  { name: 'Sit-Up',                         abbr: 'SIT', primary: 'core',                              equipment: 'bodyweight' },
-  { name: 'Crunch',                         abbr: 'CR',  primary: 'core',                              equipment: 'bodyweight' },
-  { name: 'Leg Raise',                      abbr: 'LR',  primary: 'core',                              equipment: 'bodyweight' },
-  { name: 'Glute Bridge',                   abbr: 'GB',  primary: 'legs',      secondary: 'core',      equipment: 'bodyweight' },
-  { name: 'Squat',                          abbr: 'SQ',  primary: 'legs',                              equipment: 'bodyweight' },
-  { name: 'Lunge',                          abbr: 'LN',  primary: 'legs',                              equipment: 'bodyweight' },
-  { name: 'Burpee',                         abbr: 'BRP', primary: 'cardio',    secondary: 'fullBody',  equipment: 'bodyweight' },
-  { name: 'Mountain Climber',               abbr: 'MC',  primary: 'cardio',    secondary: 'core',      equipment: 'bodyweight' },
-  { name: 'Jump Squat',                     abbr: 'JQ',  primary: 'cardio',    secondary: 'legs',      equipment: 'bodyweight' },
-  { name: 'Jumping Jack',                   abbr: 'JJ',  primary: 'cardio',                             equipment: 'bodyweight' },
-  { name: 'High Knees',                     abbr: 'HK',  primary: 'cardio',    secondary: 'legs',      equipment: 'bodyweight' },
-  { name: 'Box Jump',                       abbr: 'BJ',  primary: 'cardio',    secondary: 'legs',      equipment: 'bodyweight' },
-  { name: 'Bear Crawl',                     abbr: 'BC',  primary: 'fullBody',                           equipment: 'bodyweight' },
-  { name: 'Superman',                       abbr: 'SM',  primary: 'back',      secondary: 'core',      equipment: 'bodyweight' },
+  { name: 'Plank',                          primary: 'core',                              equipment: 'bodyweight' },
+  { name: 'Side Plank',                     primary: 'core',                              equipment: 'bodyweight' },
+  { name: 'Push-Up',                        primary: 'chest',     secondary: 'arms',      equipment: 'bodyweight' },
+  { name: 'Wide Push-Up',                   primary: 'chest',                              equipment: 'bodyweight' },
+  { name: 'Diamond Push-Up',               primary: 'arms',      secondary: 'chest',     equipment: 'bodyweight' },
+  { name: 'Pull-Up',                        primary: 'back',      secondary: 'arms',      equipment: 'bodyweight' },
+  { name: 'Chin-Up',                        primary: 'arms',      secondary: 'back',      equipment: 'bodyweight' },
+  { name: 'Dip',                            primary: 'chest',     secondary: 'arms',      equipment: 'bodyweight' },
+  { name: 'Sit-Up',                         primary: 'core',                              equipment: 'bodyweight' },
+  { name: 'Crunch',                         primary: 'core',                              equipment: 'bodyweight' },
+  { name: 'Leg Raise',                      primary: 'core',                              equipment: 'bodyweight' },
+  { name: 'Glute Bridge',                   primary: 'legs',      secondary: 'core',      equipment: 'bodyweight' },
+  { name: 'Squat',                          primary: 'legs',                              equipment: 'bodyweight' },
+  { name: 'Lunge',                          primary: 'legs',                              equipment: 'bodyweight' },
+  { name: 'Burpee',                         primary: 'cardio',    secondary: 'fullBody',  equipment: 'bodyweight' },
+  { name: 'Mountain Climber',               primary: 'cardio',    secondary: 'core',      equipment: 'bodyweight' },
+  { name: 'Jump Squat',                     primary: 'cardio',    secondary: 'legs',      equipment: 'bodyweight' },
+  { name: 'Jumping Jack',                   primary: 'cardio',                             equipment: 'bodyweight' },
+  { name: 'High Knees',                     primary: 'cardio',    secondary: 'legs',      equipment: 'bodyweight' },
+  { name: 'Box Jump',                       primary: 'cardio',    secondary: 'legs',      equipment: 'bodyweight' },
+  { name: 'Bear Crawl',                     primary: 'fullBody',                           equipment: 'bodyweight' },
+  { name: 'Superman',                       primary: 'back',      secondary: 'core',      equipment: 'bodyweight' },
 ];
 
 // ── localStorage persistence ───────────────────────────────────────────
@@ -79,7 +79,6 @@ function migrateExercise(e: any): ExerciseDefinition {
   const defaultMatch = DEFAULT_EXERCISES.find((d) => d.name === e.name);
   return {
     name: e.name,
-    abbr: e.abbr,
     primary: e.primary,
     secondary: e.secondary,
     equipment: e.equipment ?? defaultMatch?.equipment ?? (
@@ -212,11 +211,5 @@ export function getShortName(name: string): string {
   return words[0].slice(0, 10);
 }
 
-/** Auto-suggest an abbreviation from a name */
-export function suggestAbbr(name: string): string {
-  const words = name.replace(/^Kettlebell\s+/, '').split(/[\s-]+/).filter(Boolean);
-  if (words.length === 0) return '';
-  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
-  return words.map((w) => w[0]).join('').slice(0, 3).toUpperCase();
-}
+
 

@@ -8,7 +8,6 @@ import {
   deleteExercise,
   toggleExerciseEnabled,
   isNameTaken,
-  suggestAbbr,
 } from '../exercises';
 import styles from './ExerciseLibrary.module.css';
 
@@ -20,7 +19,6 @@ interface EditState {
   mode: 'add' | 'edit';
   originalName: string;
   name: string;
-  abbr: string;
   primary: MuscleGroup;
   secondary: MuscleGroup | '';
   equipment: Equipment;
@@ -32,7 +30,6 @@ function newEditState(): EditState {
     mode: 'add',
     originalName: '',
     name: '',
-    abbr: '',
     primary: 'fullBody',
     secondary: '',
     equipment: 'kettlebell',
@@ -45,7 +42,6 @@ function editStateFromDef(def: ExerciseDefinition): EditState {
     mode: 'edit',
     originalName: def.name,
     name: def.name,
-    abbr: def.abbr,
     primary: def.primary,
     secondary: def.secondary ?? '',
     equipment: def.equipment,
@@ -59,7 +55,6 @@ export function ExerciseLibrary({ onBack }: Props) {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [equipmentFilter, setEquipmentFilter] = useState<Set<Equipment>>(new Set());
   const [muscleFilter, setMuscleFilter] = useState<Set<MuscleGroup>>(new Set());
-  const [abbrManual, setAbbrManual] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   const refresh = useCallback(() => setLibrary([...getExerciseLibrary()]), []);
@@ -95,7 +90,6 @@ export function ExerciseLibrary({ onBack }: Props) {
 
   const handleEdit = (def: ExerciseDefinition) => {
     setEditing(editStateFromDef(def));
-    setAbbrManual(true);
   };
 
   const handleDuplicate = (def: ExerciseDefinition) => {
@@ -113,12 +107,10 @@ export function ExerciseLibrary({ onBack }: Props) {
     saveExercise(newDef);
     refresh();
     setEditing(editStateFromDef(newDef));
-    setAbbrManual(false);
   };
 
   const handleAdd = () => {
     setEditing(newEditState());
-    setAbbrManual(false);
   };
 
   const handleDelete = (name: string) => {
@@ -128,20 +120,10 @@ export function ExerciseLibrary({ onBack }: Props) {
     if (editing?.originalName === name) setEditing(null);
   };
 
-  // Auto-suggest abbreviation when name changes (unless user has manually edited abbr)
+  // Update name when editing
   const handleNameChange = (name: string) => {
     if (!editing) return;
-    const next: EditState = { ...editing, name };
-    if (!abbrManual) {
-      next.abbr = suggestAbbr(name);
-    }
-    setEditing(next);
-  };
-
-  const handleAbbrChange = (abbr: string) => {
-    if (!editing) return;
-    setAbbrManual(true);
-    setEditing({ ...editing, abbr: abbr.toUpperCase().slice(0, 3) });
+    setEditing({ ...editing, name });
   };
 
   const nameError = useMemo(() => {
@@ -151,20 +133,12 @@ export function ExerciseLibrary({ onBack }: Props) {
     return '';
   }, [editing]);
 
-  const abbrError = useMemo(() => {
-    if (!editing) return '';
-    if (!editing.abbr.trim()) return 'Abbreviation is required';
-    if (editing.abbr.length > 3) return 'Max 3 characters';
-    return '';
-  }, [editing]);
-
-  const canSave = editing && !nameError && !abbrError && editing.name.trim() && editing.abbr.trim();
+  const canSave = editing && !nameError && editing.name.trim();
 
   const handleSave = () => {
     if (!editing || !canSave) return;
     const def: ExerciseDefinition = {
       name: editing.name.trim(),
-      abbr: editing.abbr.trim(),
       primary: editing.primary,
       secondary: editing.secondary || undefined,
       equipment: editing.equipment,
@@ -238,7 +212,6 @@ export function ExerciseLibrary({ onBack }: Props) {
                 {ex.secondary && <span className={styles.dot} style={{ background: MUSCLE_COLORS[ex.secondary] }} />}
               </span>
               <span className={styles.itemName}>{ex.name}</span>
-              <span className={styles.itemAbbr}>{ex.abbr}</span>
               <span className={styles.itemEquip}>{ex.equipment === 'kettlebell' ? '🔔' : '🤸'}</span>
             </div>
             <div className={styles.itemActions}>
@@ -286,18 +259,6 @@ export function ExerciseLibrary({ onBack }: Props) {
                 autoFocus
               />
               {nameError && <span className={styles.errorText}>{nameError}</span>}
-
-              {/* Abbreviation */}
-              <label className={styles.fieldLabel}>Abbreviation (2–3 letters)</label>
-              <input
-                className={`${styles.fieldInput} ${styles.fieldInputShort}${abbrError ? ` ${styles.fieldError}` : ''}`}
-                type="text"
-                value={editing.abbr}
-                onChange={(e) => handleAbbrChange(e.target.value)}
-                placeholder="ABC"
-                maxLength={3}
-              />
-              {abbrError && <span className={styles.errorText}>{abbrError}</span>}
 
               {/* Equipment */}
               <label className={styles.fieldLabel}>Equipment</label>

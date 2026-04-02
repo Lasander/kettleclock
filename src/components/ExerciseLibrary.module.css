@@ -167,12 +167,6 @@
   white-space: nowrap;
 }
 
-.itemAbbr {
-  font-size: 0.72rem;
-  color: var(--color-text-muted);
-  flex-shrink: 0;
-}
-
 .itemEquip {
   font-size: 0.75rem;
   flex-shrink: 0;

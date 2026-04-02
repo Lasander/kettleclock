@@ -25,7 +25,7 @@ kettleclock/
 │   ├── main.tsx                    # React entry point
 │   ├── App.tsx                     # Root: routes between Builder, Timer, Summary
 │   ├── types.ts                    # Shared TypeScript types
-│   ├── exercises.ts                # Exercise library with muscle groups + abbreviations
+│   ├── exercises.ts                # Exercise library with muscle groups
 │   ├── segments.ts                 # Workout grid → flat segment list
 │   ├── storage.ts                  # localStorage helpers
 │   ├── audio.ts                    # Web Audio beep/sound helpers
@@ -55,9 +55,11 @@ type MuscleGroup = 'legs' | 'back' | 'shoulders' | 'core' | 'fullBody';
 
 interface ExerciseDefinition {
   name: string;
-  abbr: string;           // 2–3 letter abbreviation
   primary: MuscleGroup;
   secondary?: MuscleGroup;
+  equipment: Equipment;
+  builtin: boolean;
+  enabled: boolean;
 }
 
 interface ExerciseSlot {
@@ -84,7 +86,7 @@ interface Workout {
 ## Visual Grid
 
 Each exercise cell is a ~50–60 px square showing:
-- **Abbreviation** in white text (e.g. "SW", "GS", "TGU")
+- **Short name** in white text (auto-derived from exercise name via `getShortName()`)
 - **Background colour** from primary muscle group
 - **Diagonal split** (45° linear-gradient) when exercise has two muscle groups
 - **Grey** (#555) for empty/unassigned slots

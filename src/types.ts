@@ -4,7 +4,6 @@ export type Equipment = 'kettlebell' | 'bodyweight';
 
 export interface ExerciseDefinition {
   name: string;
-  abbr: string;
   primary: MuscleGroup;
   secondary?: MuscleGroup;
   equipment: Equipment;
