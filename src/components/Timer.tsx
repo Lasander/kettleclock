@@ -116,8 +116,10 @@ export function Timer({ workout, onDone, onAbort }: Props) {
   }, []);
 
   const [showAbortDialog, setShowAbortDialog] = useState(false);
+  const pausedBeforeAbortRef = useRef(false);
 
   const handleAbort = () => {
+    pausedBeforeAbortRef.current = paused;
     setPaused(true);
     setShowAbortDialog(true);
   };
@@ -168,7 +170,7 @@ export function Timer({ workout, onDone, onAbort }: Props) {
           <div className={styles.dialog}>
             <p className={styles.dialogQuestion}>Abort workout?</p>
             <div className={styles.dialogBtns}>
-              <button className={styles.dialogCancel} onClick={() => { setShowAbortDialog(false); setPaused(false); }}>
+              <button className={styles.dialogCancel} onClick={() => { setShowAbortDialog(false); setPaused(pausedBeforeAbortRef.current); }}>
                 Continue
               </button>
               <button className={styles.dialogConfirm} onClick={onAbort}>

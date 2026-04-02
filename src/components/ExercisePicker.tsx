@@ -10,11 +10,13 @@ interface Props {
   onClose: () => void;
   title?: string;
   filledNames?: Set<string>;
+  inSetNames?: Set<string>;
+  keepOpen?: boolean;
 }
 
 type Equipment = 'kettlebell' | 'bodyweight';
 
-export function ExercisePicker({ value, onSelect, onClose, title = 'Select Exercise', filledNames }: Props) {
+export function ExercisePicker({ value, onSelect, onClose, title = 'Select Exercise', filledNames, inSetNames, keepOpen }: Props) {
   const [equipmentFilter, setEquipmentFilter] = useState<Set<Equipment>>(new Set());
   const [muscleFilter, setMuscleFilter] = useState<Set<MuscleGroup>>(new Set());
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -121,7 +123,7 @@ export function ExercisePicker({ value, onSelect, onClose, title = 'Select Exerc
         <div className={styles.list} data-picker-list>
           <button
             className={`${styles.item}${value === '' ? ` ${styles.itemSelected}` : ''}`}
-            onClick={() => { onSelect(''); onClose(); }}
+            onClick={() => { onSelect(''); if (!keepOpen) onClose(); }}
           >
             <span className={styles.itemName}>— Empty —</span>
           </button>
@@ -129,7 +131,7 @@ export function ExercisePicker({ value, onSelect, onClose, title = 'Select Exerc
             <button
               key={ex.name}
               className={`${styles.item}${value === ex.name ? ` ${styles.itemSelected}` : ''}`}
-              onClick={() => { onSelect(ex.name); onClose(); }}
+              onClick={() => { onSelect(ex.name); if (!keepOpen) onClose(); }}
             >
               <span className={styles.itemDots}>
                 <span className={styles.dot} style={{ background: MUSCLE_COLORS[ex.primary] }} />
@@ -139,7 +141,9 @@ export function ExercisePicker({ value, onSelect, onClose, title = 'Select Exerc
               </span>
               <span className={styles.itemName}>{ex.name}</span>
               <span className={styles.itemAbbr}>{getShortName(ex.name)}</span>
-              {filledNames?.has(ex.name) && <span className={styles.filledDot} />}
+              {inSetNames?.has(ex.name)
+                ? <span className={styles.inSetDot} />
+                : filledNames?.has(ex.name) && <span className={styles.filledDot} />}
             </button>
           ))}
           {filtered.length === 0 && (

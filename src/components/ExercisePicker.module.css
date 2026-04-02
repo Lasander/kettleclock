@@ -152,6 +152,7 @@
   display: flex;
   gap: 3px;
   flex-shrink: 0;
+  width: 23px; /* 2 dots × 10px + 1 gap × 3px — keeps names aligned */
 }
 
 .dot {
@@ -170,6 +171,16 @@
   font-size: 0.72rem;
   color: var(--color-text-muted);
   flex-shrink: 0;
+}
+
+.inSetDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f59e0b;
+  flex-shrink: 0;
+  opacity: 0.85;
+  margin-left: 4px;
 }
 
 .filledDot {

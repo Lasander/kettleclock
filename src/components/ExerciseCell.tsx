@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { getExerciseDef, getShortName } from '../exercises';
 import { MUSCLE_COLORS_MUTED } from '../types';
-import { ExercisePicker } from './ExercisePicker';
 import styles from './ExerciseCell.module.css';
 
 interface Props {
@@ -9,9 +7,8 @@ interface Props {
   isDuplicate: boolean;
   setIdx: number;
   exIdx: number;
-  onChange: (name: string) => void;
+  onTap?: () => void;
   editMode?: boolean;
-  filledNames?: Set<string>;
   isSource?: boolean;
   isTarget?: boolean;
 }
@@ -32,13 +29,11 @@ export function ExerciseCell({
   isDuplicate,
   setIdx,
   exIdx,
-  onChange,
+  onTap,
   editMode,
-  filledNames,
   isSource,
   isTarget,
 }: Props) {
-  const [pickerOpen, setPickerOpen] = useState(false);
   const displayName = exerciseName ? getShortName(exerciseName) : '';
   const def = getExerciseDef(exerciseName);
   const hasSplit = !!(def?.secondary);
@@ -55,41 +50,31 @@ export function ExerciseCell({
     .join(' ');
 
   return (
-    <>
-      <div
-        className={classNames}
-        style={getCellStyle(exerciseName)}
-        data-cell=""
-        data-set={setIdx}
-        data-ex={exIdx}
-        onClick={!editMode ? () => setPickerOpen(true) : undefined}
-      >
-        {hasSplit && (
-          <div
-            className={styles.splitOverlay}
-            style={{ background: MUSCLE_COLORS_MUTED[def!.secondary!] }}
-          />
-        )}
-        <span className={styles.cellText}>
-          {editMode ? (
-            <>
-              <span className={styles.dragHandle}>⠿</span>
-              <span className={styles.abbrText}>{displayName || '+'}</span>
-            </>
-          ) : (
-            exerciseName ? displayName : '+'
-          )}
-        </span>
-      </div>
-      {pickerOpen && (
-        <ExercisePicker
-          value={exerciseName}
-          filledNames={filledNames}
-          onSelect={onChange}
-          onClose={() => setPickerOpen(false)}
+    <div
+      className={classNames}
+      style={getCellStyle(exerciseName)}
+      data-cell=""
+      data-set={setIdx}
+      data-ex={exIdx}
+      onClick={!editMode ? onTap : undefined}
+    >
+      {hasSplit && (
+        <div
+          className={styles.splitOverlay}
+          style={{ background: MUSCLE_COLORS_MUTED[def!.secondary!] }}
         />
       )}
-    </>
+      <span className={styles.cellText}>
+        {editMode ? (
+          <>
+            <span className={styles.dragHandle}>⠿</span>
+            <span className={styles.abbrText}>{displayName || '+'}</span>
+          </>
+        ) : (
+          exerciseName ? displayName : '+'
+        )}
+      </span>
+    </div>
   );
 }
 

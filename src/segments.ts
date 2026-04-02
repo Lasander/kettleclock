@@ -6,7 +6,7 @@ export function buildSegments(workout: Workout): Segment[] {
   // Initial countdown (get ready)
   segments.push({
     type: 'initialCountdown',
-    label: 'Get Ready',
+    label: 'Get ready for workout',
     duration: workout.defaultExerciseRest,
     setIndex: 0,
     exerciseIndex: 0,
@@ -28,7 +28,7 @@ export function buildSegments(workout: Workout): Segment[] {
       if (e < exerciseCount - 1) {
         segments.push({
           type: 'exerciseRest',
-          label: 'Rest',
+          label: 'Get ready for next exercise',
           duration: slot?.restAfter ?? workout.defaultExerciseRest,
           setIndex: s,
           exerciseIndex: e,
@@ -38,7 +38,7 @@ export function buildSegments(workout: Workout): Segment[] {
     if (s < workout.setsCount - 1) {
       segments.push({
         type: 'setRest',
-        label: 'Set Rest',
+        label: `Get ready for set ${s + 2}`,
         duration: workout.defaultSetRest,
         setIndex: s,
         exerciseIndex: exerciseCount - 1,

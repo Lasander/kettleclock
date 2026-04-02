@@ -78,7 +78,35 @@ export function WorkoutBuilder({ onStart }: Props) {
   const [showOverrides, setShowOverrides] = useState(false);
   const [showSavedPanel, setShowSavedPanel] = useState(false);
 
-  // Manual fill mode: tracks the next empty slot to fill
+  // Set-fill mode: when tapping a cell, fill the set starting from that cell, wrapping around
+  const [setFill, setSetFill] = useState<{ setIdx: number; order: number[]; pos: number } | null>(null);
+
+  const startSetFill = useCallback((setIdx: number, exIdx: number, perSet: number) => {
+    const order: number[] = [];
+    for (let i = 0; i < perSet; i++) order.push((exIdx + i) % perSet);
+    setSetFill({ setIdx, order, pos: 0 });
+  }, []);
+
+  const handleSetFillSelect = useCallback((name: string) => {
+    if (!setFill) return;
+    const { setIdx, order, pos } = setFill;
+    const exIdx = order[pos];
+    setWorkout((w) => {
+      const grid = w.grid.map((row) => [...row]);
+      grid[setIdx][exIdx] = { ...grid[setIdx][exIdx], exerciseName: name };
+      return { ...w, grid, updatedAt: Date.now() };
+    });
+    const nextPos = pos + 1;
+    if (nextPos >= order.length) {
+      setSetFill(null); // all slots in set filled
+    } else {
+      setSetFill({ setIdx, order, pos: nextPos });
+    }
+  }, [setFill]);
+
+  const setFillRemaining = setFill ? setFill.order.length - setFill.pos : 0;
+
+  // Manual fill mode: fill all empty cells across sets
   const [manualFillSlot, setManualFillSlot] = useState<{ s: number; e: number } | null>(null);
 
   const findNextEmptySlot = useCallback((grid: ExerciseSlot[][]): { s: number; e: number } | null => {
@@ -172,14 +200,6 @@ export function WorkoutBuilder({ onStart }: Props) {
 
   const handleExercisesPerSetChange = useCallback((val: number) => {
     updateWorkout((w) => ({ ...w, exercisesPerSet: val, grid: resizeGrid(w.grid, w.setsCount, val) }));
-  }, [updateWorkout]);
-
-  const handleCellChange = useCallback((setIdx: number, exIdx: number, name: string) => {
-    updateWorkout((w) => {
-      const grid = w.grid.map((row) => [...row]);
-      grid[setIdx][exIdx] = { ...grid[setIdx][exIdx], exerciseName: name };
-      return { ...w, grid };
-    });
   }, [updateWorkout]);
 
   const handleCellOverride = useCallback(
@@ -310,7 +330,7 @@ export function WorkoutBuilder({ onStart }: Props) {
       <div className={styles.gridSection}>
         <div className={styles.gridHeader}>
           <span className={styles.gridLabel}>Exercise Grid</span>
-          <QuickFill setsCount={workout.setsCount} exercisesPerSet={workout.exercisesPerSet} onFill={handleQuickFill} onFillManual={handleStartManualFill} />
+          <QuickFill setsCount={workout.setsCount} exercisesPerSet={workout.exercisesPerSet} grid={workout.grid} onFill={handleQuickFill} onFillManual={handleStartManualFill} />
         </div>
 
         <div className={styles.legend}>
@@ -364,9 +384,8 @@ export function WorkoutBuilder({ onStart }: Props) {
                               isDuplicate={!!(slot.exerciseName && dupes?.has(slot.exerciseName))}
                               setIdx={s}
                               exIdx={e}
-                              onChange={(name) => handleCellChange(s, e, name)}
+                              onTap={() => startSetFill(s, e, workout.exercisesPerSet)}
                               editMode={editMode}
-                              filledNames={filledNames}
                               isSource={!!(dragSource && dragSource.s === s && dragSource.e === e)}
                               isTarget={!!(dragTarget && dragTarget.s === s && dragTarget.e === e && dragSource && (dragSource.s !== s || dragSource.e !== e))}
                             />
@@ -450,11 +469,24 @@ export function WorkoutBuilder({ onStart }: Props) {
         </button>
       </div>
 
-      {manualFillSlot !== null && (
+      {setFill !== null && (
+        <ExercisePicker
+          value={workout.grid[setFill.setIdx]?.[setFill.order[setFill.pos]]?.exerciseName ?? ''}
+          title={`Exercises for set ${setFill.setIdx + 1} — ${setFillRemaining} remaining`}
+          filledNames={filledNames}
+          inSetNames={new Set(workout.grid[setFill.setIdx].map((s) => s.exerciseName).filter(Boolean) as string[])}
+          keepOpen
+          onSelect={handleSetFillSelect}
+          onClose={() => setSetFill(null)}
+        />
+      )}
+
+      {manualFillSlot !== null && setFill === null && (
         <ExercisePicker
           value=""
-          title={`Fill slot (${emptySlotCount} remaining)`}
+          title={`Exercises for workout — ${emptySlotCount} remaining`}
           filledNames={filledNames}
+          keepOpen
           onSelect={handleManualFillSelect}
           onClose={() => setManualFillSlot(null)}
         />
