@@ -3,6 +3,7 @@ import type { Workout, Segment } from '../types';
 import { buildSegments } from '../segments';
 import { resumeAudio, playCountdownBeep, playExerciseStart, playHalfTime, playExerciseEnding, playSetRest } from '../audio';
 import { requestWakeLock, releaseWakeLock, reacquireOnVisibilityChange } from '../wakeLock';
+import { getShortName } from '../exercises';
 import styles from './Timer.module.css';
 
 interface Props {
@@ -114,10 +115,11 @@ export function Timer({ workout, onDone, onAbort }: Props) {
     };
   }, []);
 
+  const [showAbortDialog, setShowAbortDialog] = useState(false);
+
   const handleAbort = () => {
-    if (confirm('Abort workout?')) {
-      onAbort();
-    }
+    setPaused(true);
+    setShowAbortDialog(true);
   };
 
   if (!seg) return null;
@@ -150,7 +152,7 @@ export function Timer({ workout, onDone, onAbort }: Props) {
     if (nextRow) {
       upNextText = `Set ${nextSetIdx + 1}`;
       upNextList = nextRow
-        .map((slot) => slot.exerciseName || '(empty)')
+        .map((slot) => slot.exerciseName ? getShortName(slot.exerciseName) : '—')
         .filter(Boolean);
     }
   }
@@ -161,6 +163,21 @@ export function Timer({ workout, onDone, onAbort }: Props) {
       data-phase={phaseData}
       data-ending={isEndingSoon ? 'true' : undefined}
     >
+      {showAbortDialog && (
+        <div className={styles.dialogOverlay}>
+          <div className={styles.dialog}>
+            <p className={styles.dialogQuestion}>Abort workout?</p>
+            <div className={styles.dialogBtns}>
+              <button className={styles.dialogCancel} onClick={() => { setShowAbortDialog(false); setPaused(false); }}>
+                Continue
+              </button>
+              <button className={styles.dialogConfirm} onClick={onAbort}>
+                Abort
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className={styles.info}>
         <div className={styles.phase}>{phaseLabel}</div>
         <div className={styles.label}>{seg.label}</div>

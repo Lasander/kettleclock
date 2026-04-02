@@ -7,6 +7,7 @@ import { generateId } from '../utils';
 import { resumeAudio } from '../audio';
 import { Logo } from './Logo';
 import { ExerciseCell } from './ExerciseCell';
+import { ExercisePicker } from './ExercisePicker';
 import { NumberControl } from './NumberControl';
 import { QuickFill } from './QuickFill';
 import styles from './WorkoutBuilder.module.css';
@@ -75,6 +76,41 @@ export function WorkoutBuilder({ onStart }: Props) {
   const [workout, setWorkout] = useState<Workout>(newWorkout);
   const [saved, setSaved] = useState<Workout[]>([]);
   const [showOverrides, setShowOverrides] = useState(false);
+  const [showSavedPanel, setShowSavedPanel] = useState(false);
+
+  // Manual fill mode: tracks the next empty slot to fill
+  const [manualFillSlot, setManualFillSlot] = useState<{ s: number; e: number } | null>(null);
+
+  const findNextEmptySlot = useCallback((grid: ExerciseSlot[][]): { s: number; e: number } | null => {
+    for (let s = 0; s < grid.length; s++) {
+      for (let e = 0; e < grid[s].length; e++) {
+        if (!grid[s][e].exerciseName) return { s, e };
+      }
+    }
+    return null;
+  }, []);
+
+  const handleStartManualFill = useCallback(() => {
+    setManualFillSlot(findNextEmptySlot(workout.grid));
+  }, [workout.grid, findNextEmptySlot]);
+
+  const handleManualFillSelect = useCallback((name: string) => {
+    if (!manualFillSlot) return;
+    const { s, e } = manualFillSlot;
+    setWorkout((w) => {
+      const grid = w.grid.map((row) => [...row]);
+      grid[s][e] = { ...grid[s][e], exerciseName: name };
+      const next = findNextEmptySlot(grid);
+      setManualFillSlot(next);
+      return { ...w, grid, updatedAt: Date.now() };
+    });
+  }, [manualFillSlot, findNextEmptySlot]);
+
+  const emptySlotCount = useMemo(() => {
+    let count = 0;
+    for (const row of workout.grid) for (const slot of row) if (!slot.exerciseName) count++;
+    return count;
+  }, [workout.grid]);
 
   // Edit mode (grid reorder)
   const [editMode, setEditMode] = useState(false);
@@ -118,6 +154,12 @@ export function WorkoutBuilder({ onStart }: Props) {
       map.set(String(s), dupes);
     }
     return map;
+  }, [workout.grid]);
+
+  const filledNames = useMemo(() => {
+    const names = new Set<string>();
+    workout.grid.forEach(row => row.forEach(slot => { if (slot.exerciseName) names.add(slot.exerciseName); }));
+    return names;
   }, [workout.grid]);
 
   const updateWorkout = useCallback((updater: (w: Workout) => Workout) => {
@@ -201,11 +243,6 @@ export function WorkoutBuilder({ onStart }: Props) {
   }, [updateWorkout]);
 
   const handleSave = () => {
-    if (!workout.name.trim()) {
-      const name = prompt('Workout name:');
-      if (!name) return;
-      updateWorkout((w) => ({ ...w, name: name.trim() }));
-    }
     saveWorkout(workout);
     refreshSaved();
   };
@@ -237,33 +274,25 @@ export function WorkoutBuilder({ onStart }: Props) {
         <h1 className={styles.title}>KettleClock</h1>
       </div>
 
-      {saved.length > 0 && (
-        <div className={styles.savedList}>
-          <div className={styles.savedListLabel}>Saved Workouts</div>
-          {saved.map((w) => (
-            <div key={w.id} className={styles.savedItem}>
-              <span onClick={() => handleLoad(w)}>{w.name || 'Untitled'}</span>
-              <div className={styles.savedActions}>
-                <button onClick={() => handleLoad(w)}>Load</button>
-                <button onClick={() => handleDelete(w.id)} style={{ color: 'var(--color-danger)' }}>
-                  ✕
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Saved panel trigger is in the name row below */}
 
       <div className={styles.nameSection}>
-        <input
-          className={styles.nameInput}
-          type="text"
-          name="workout-name"
-          autoComplete="off"
-          value={workout.name}
-          onChange={(e) => updateWorkout((w) => ({ ...w, name: e.target.value }))}
-          placeholder="Workout name"
-        />
+        <div className={styles.nameRow}>
+          <input
+            className={styles.nameInput}
+            type="text"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            value={workout.name}
+            onChange={(e) => updateWorkout((w) => ({ ...w, name: e.target.value }))}
+            placeholder="Workout name"
+          />
+          <button className={styles.savedBtn} onClick={() => setShowSavedPanel(true)}>
+            Saved{saved.length > 0 ? ` (${saved.length})` : ''}
+          </button>
+        </div>
       </div>
 
       <div className={styles.controlsGroup}>
@@ -272,16 +301,16 @@ export function WorkoutBuilder({ onStart }: Props) {
           <NumberControl label="Ex / Set" value={workout.exercisesPerSet} min={1} max={12} onChange={handleExercisesPerSetChange} />
         </div>
         <div className={styles.controlsRow}>
-          <NumberControl label="Exercise" value={workout.defaultExerciseDuration} min={1} max={300} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultExerciseDuration: v }))} />
-          <NumberControl label="Rest" value={workout.defaultExerciseRest} min={0} max={300} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultExerciseRest: v }))} />
-          <NumberControl label="Set Rest" value={workout.defaultSetRest} min={0} max={600} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultSetRest: v }))} />
+          <NumberControl label="Exercise" value={workout.defaultExerciseDuration} min={1} max={999} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultExerciseDuration: v }))} />
+          <NumberControl label="Rest" value={workout.defaultExerciseRest} min={0} max={999} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultExerciseRest: v }))} />
+          <NumberControl label="Set Rest" value={workout.defaultSetRest} min={0} max={999} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultSetRest: v }))} />
         </div>
       </div>
 
       <div className={styles.gridSection}>
         <div className={styles.gridHeader}>
           <span className={styles.gridLabel}>Exercise Grid</span>
-          <QuickFill setsCount={workout.setsCount} exercisesPerSet={workout.exercisesPerSet} onFill={handleQuickFill} />
+          <QuickFill setsCount={workout.setsCount} exercisesPerSet={workout.exercisesPerSet} onFill={handleQuickFill} onFillManual={handleStartManualFill} />
         </div>
 
         <div className={styles.legend}>
@@ -337,6 +366,7 @@ export function WorkoutBuilder({ onStart }: Props) {
                               exIdx={e}
                               onChange={(name) => handleCellChange(s, e, name)}
                               editMode={editMode}
+                              filledNames={filledNames}
                               isSource={!!(dragSource && dragSource.s === s && dragSource.e === e)}
                               isTarget={!!(dragTarget && dragTarget.s === s && dragTarget.e === e && dragSource && (dragSource.s !== s || dragSource.e !== e))}
                             />
@@ -419,6 +449,40 @@ export function WorkoutBuilder({ onStart }: Props) {
           Start Workout
         </button>
       </div>
+
+      {manualFillSlot !== null && (
+        <ExercisePicker
+          value=""
+          title={`Fill slot (${emptySlotCount} remaining)`}
+          filledNames={filledNames}
+          onSelect={handleManualFillSelect}
+          onClose={() => setManualFillSlot(null)}
+        />
+      )}
+
+      {showSavedPanel && (
+        <div className={styles.savedOverlay} onClick={() => setShowSavedPanel(false)}>
+          <div className={styles.savedPanel} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.savedPanelHeader}>
+              <span className={styles.savedPanelTitle}>Saved Workouts</span>
+              <button className={styles.savedPanelClose} onClick={() => setShowSavedPanel(false)}>✕</button>
+            </div>
+            {saved.length === 0 ? (
+              <div className={styles.savedEmpty}>No saved workouts yet</div>
+            ) : (
+              saved.map((w) => (
+                <div key={w.id} className={styles.savedItem}>
+                  <span onClick={() => { handleLoad(w); setShowSavedPanel(false); }}>{w.name || 'Untitled'}</span>
+                  <div className={styles.savedActions}>
+                    <button onClick={() => { handleLoad(w); setShowSavedPanel(false); }}>Load</button>
+                    <button onClick={() => handleDelete(w.id)} style={{ color: 'var(--color-danger)' }}>✕</button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

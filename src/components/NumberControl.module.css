@@ -17,7 +17,7 @@
   font-weight: 700;
   color: var(--color-text);
   background: var(--color-surface);
-  border: none;
+  border: 2px solid transparent;
   border-radius: var(--radius);
   padding: 8px 16px;
   min-width: 64px;
@@ -25,29 +25,147 @@
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.display:hover, .display:focus-within {
-  background: var(--color-surface-elevated);
-}
-
-.input {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--color-text);
-  background: var(--color-surface-elevated);
-  border: 2px solid var(--color-primary);
-  border-radius: var(--radius);
-  padding: 8px 16px;
-  min-width: 64px;
-  width: 80px;
-  text-align: center;
-  -webkit-appearance: none;
-  appearance: none;
-  min-height: auto;
+.displayActive {
+  border-color: var(--color-primary);
 }
 
 .suffix {
   font-size: 0.7rem;
   color: var(--color-text-muted);
+  margin-left: 2px;
 }
+
+/* ── Numpad overlay ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 90;
+  display: flex;
+  align-items: flex-end;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.numpad {
+  width: 100%;
+  background: var(--color-surface-elevated);
+  border-radius: 20px 20px 0 0;
+  padding: 12px 16px max(env(safe-area-inset-bottom), 20px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.numpadHandle {
+  width: 36px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.numpadLabel {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.numpadValue {
+  font-size: 3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  line-height: 1;
+  min-height: 56px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  transition: color 0.15s ease;
+}
+
+.numpadValuePending {
+  color: var(--color-primary);
+}
+
+.numpadSuffix {
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.stepRow {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.stepBtn {
+  flex: 1;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 10px;
+  border-radius: var(--radius);
+  min-height: 44px;
+  border: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.stepBtn:active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.digitGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.digitBtn {
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 1.4rem;
+  font-weight: 600;
+  padding: 14px 8px;
+  border-radius: var(--radius);
+  min-height: 52px;
+  text-align: center;
+  border: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.digitBtn:active {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(0.95);
+}
+
+.confirmBtn {
+  background: var(--color-primary);
+  color: white;
+}
+
+.confirmBtn:active {
+  background: var(--color-primary);
+  opacity: 0.85;
+  transform: scale(0.95);
+}
+
+.cancelBtn {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+

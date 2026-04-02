@@ -14,9 +14,10 @@ interface Props {
   setsCount: number;
   exercisesPerSet: number;
   onFill: (grid: ExerciseSlot[][]) => void;
+  onFillManual: () => void;
 }
 
-export function QuickFill({ setsCount, exercisesPerSet, onFill }: Props) {
+export function QuickFill({ setsCount, exercisesPerSet, onFill, onFillManual }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -90,6 +91,9 @@ export function QuickFill({ setsCount, exercisesPerSet, onFill }: Props) {
       </button>
       {open && (
         <div className={styles.menu}>
+          <button className={styles.menuItem} onClick={() => { setOpen(false); onFillManual(); }}>
+            ✏️ Fill manually
+          </button>
           <button className={styles.menuItem} onClick={fillRandom}>
             🎲 Random
           </button>

@@ -8,11 +8,13 @@ interface Props {
   value: string;
   onSelect: (name: string) => void;
   onClose: () => void;
+  title?: string;
+  filledNames?: Set<string>;
 }
 
 type Equipment = 'kettlebell' | 'bodyweight';
 
-export function ExercisePicker({ value, onSelect, onClose }: Props) {
+export function ExercisePicker({ value, onSelect, onClose, title = 'Select Exercise', filledNames }: Props) {
   const [equipmentFilter, setEquipmentFilter] = useState<Set<Equipment>>(new Set());
   const [muscleFilter, setMuscleFilter] = useState<Set<MuscleGroup>>(new Set());
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -69,7 +71,7 @@ export function ExercisePicker({ value, onSelect, onClose }: Props) {
     <div className={styles.overlay} ref={overlayRef} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <span className={styles.title}>Select Exercise</span>
+          <span className={styles.title}>{title}</span>
           <button className={styles.closeBtn} onClick={onClose}>✕</button>
         </div>
 
@@ -137,6 +139,7 @@ export function ExercisePicker({ value, onSelect, onClose }: Props) {
               </span>
               <span className={styles.itemName}>{ex.name}</span>
               <span className={styles.itemAbbr}>{getShortName(ex.name)}</span>
+              {filledNames?.has(ex.name) && <span className={styles.filledDot} />}
             </button>
           ))}
           {filtered.length === 0 && (

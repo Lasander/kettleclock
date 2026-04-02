@@ -11,6 +11,7 @@ interface Props {
   exIdx: number;
   onChange: (name: string) => void;
   editMode?: boolean;
+  filledNames?: Set<string>;
   isSource?: boolean;
   isTarget?: boolean;
 }
@@ -33,6 +34,7 @@ export function ExerciseCell({
   exIdx,
   onChange,
   editMode,
+  filledNames,
   isSource,
   isTarget,
 }: Props) {
@@ -82,6 +84,7 @@ export function ExerciseCell({
       {pickerOpen && (
         <ExercisePicker
           value={exerciseName}
+          filledNames={filledNames}
           onSelect={onChange}
           onClose={() => setPickerOpen(false)}
         />

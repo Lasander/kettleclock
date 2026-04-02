@@ -149,3 +149,57 @@
   padding: 14px 24px;
   font-size: 0.9rem;
 }
+
+.dialogOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.dialog {
+  background: var(--color-surface-elevated);
+  border-radius: 20px;
+  padding: 32px 24px 24px;
+  width: min(340px, calc(100vw - 48px));
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  text-align: center;
+}
+
+.dialogQuestion {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.dialogBtns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dialogCancel {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text);
+  font-size: 1.1rem;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+}
+
+.dialogConfirm {
+  background: var(--color-danger);
+  color: white;
+  font-size: 1.1rem;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  font-weight: 700;
+}

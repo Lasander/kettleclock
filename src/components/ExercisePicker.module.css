@@ -172,6 +172,16 @@
   flex-shrink: 0;
 }
 
+.filledDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  flex-shrink: 0;
+  opacity: 0.75;
+  margin-left: 4px;
+}
+
 .empty {
   text-align: center;
   color: var(--color-text-muted);
