@@ -112,7 +112,7 @@
   border-radius: var(--radius-lg);
   padding: 16px;
   margin-bottom: 16px;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .gridHeader {
@@ -154,40 +154,55 @@
 .grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
 }
 
-.gridEditMode {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 6px;
-  border-radius: var(--radius);
+.setGroup {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  width: 100%;
 }
 
-.setRow {
+.setIndicator {
   display: flex;
   align-items: center;
-  gap: 8px;
   justify-content: center;
+  min-width: 22px;
+  position: relative;
+}
+
+.setIndicator::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 2px;
+  background: var(--color-separator);
+  border-radius: 1px;
 }
 
 .setLabel {
   font-size: 0.7rem;
   color: var(--color-text-muted);
-  min-width: 18px;
-  text-align: right;
   font-variant-numeric: tabular-nums;
+  padding-right: 6px;
+}
+
+.setContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
 }
 
 .setCells {
   display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.setCells::-webkit-scrollbar {
-  display: none;
+  gap: 6px;
+  justify-content: center;
 }
 
 .toolbar {

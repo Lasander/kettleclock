@@ -55,13 +55,25 @@ export const MUSCLE_COLORS: Record<MuscleGroup, string> = {
   back:      '#60b5ff', // blue
 };
 
+/** Muted/darker variants for grid cell backgrounds (better white text contrast) */
+export const MUSCLE_COLORS_MUTED: Record<MuscleGroup, string> = {
+  legs:      '#1a7a52',
+  core:      '#6a8500',
+  cardio:    '#8a7000',
+  fullBody:  '#8a4a2a',
+  arms:      '#8a3a5a',
+  chest:     '#7a3a8a',
+  shoulders: '#5a4580',
+  back:      '#2a5a8a',
+};
+
 export const MUSCLE_LABELS: Record<MuscleGroup, string> = {
-  legs:      'Legs',
+  legs:      'Leg',
   core:      'Core',
   cardio:    'Cardio',
-  fullBody:  'Full Body',
-  arms:      'Arms',
+  fullBody:  'Full',
+  arms:      'Arm',
   chest:     'Chest',
-  shoulders: 'Shoulders',
+  shoulders: 'Shoulder',
   back:      'Back',
 };

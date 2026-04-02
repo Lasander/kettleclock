@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { EXERCISE_LIBRARY, EQUIPMENT_MAP, getShortName } from '../exercises';
 import { MUSCLE_COLORS, MUSCLE_LABELS, MUSCLE_ORDER } from '../types';
 import type { MuscleGroup } from '../types';
@@ -10,22 +10,63 @@ interface Props {
   onClose: () => void;
 }
 
-type EquipmentFilter = 'all' | 'kettlebell' | 'bodyweight';
+type Equipment = 'kettlebell' | 'bodyweight';
 
 export function ExercisePicker({ value, onSelect, onClose }: Props) {
-  const [equipment, setEquipment] = useState<EquipmentFilter>('all');
-  const [muscleFilter, setMuscleFilter] = useState<MuscleGroup | null>(null);
+  const [equipmentFilter, setEquipmentFilter] = useState<Set<Equipment>>(new Set());
+  const [muscleFilter, setMuscleFilter] = useState<Set<MuscleGroup>>(new Set());
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  // Block body scrolling while picker is open
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  // Prevent touch events on overlay from reaching behind
+  useEffect(() => {
+    const el = overlayRef.current;
+    if (!el) return;
+    const block = (e: TouchEvent) => {
+      // Allow scrolling inside .list, block everything else from leaking
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-picker-list]')) {
+        e.preventDefault();
+      }
+    };
+    el.addEventListener('touchmove', block, { passive: false });
+    return () => el.removeEventListener('touchmove', block);
+  }, []);
+
+  const toggleEquipment = (eq: Equipment) => {
+    setEquipmentFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(eq)) next.delete(eq);
+      else next.add(eq);
+      return next;
+    });
+  };
+
+  const toggleMuscle = (m: MuscleGroup) => {
+    setMuscleFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(m)) next.delete(m);
+      else next.add(m);
+      return next;
+    });
+  };
 
   const filtered = useMemo(() => {
     return EXERCISE_LIBRARY.filter((ex) => {
-      if (equipment !== 'all' && EQUIPMENT_MAP.get(ex.name) !== equipment) return false;
-      if (muscleFilter && ex.primary !== muscleFilter && ex.secondary !== muscleFilter) return false;
+      if (equipmentFilter.size > 0 && !equipmentFilter.has(EQUIPMENT_MAP.get(ex.name)!)) return false;
+      if (muscleFilter.size > 0 && !muscleFilter.has(ex.primary) && !(ex.secondary && muscleFilter.has(ex.secondary))) return false;
       return true;
     });
-  }, [equipment, muscleFilter]);
+  }, [equipmentFilter, muscleFilter]);
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} ref={overlayRef} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <span className={styles.title}>Select Exercise</span>
@@ -34,39 +75,48 @@ export function ExercisePicker({ value, onSelect, onClose }: Props) {
 
         {/* Equipment filter */}
         <div className={styles.filterRow}>
-          {(['all', 'kettlebell', 'bodyweight'] as const).map((f) => (
-            <button
-              key={f}
-              className={`${styles.filterBtn}${equipment === f ? ` ${styles.filterBtnActive}` : ''}`}
-              onClick={() => setEquipment(f)}
-            >
-              {f === 'all' ? '🏋️ All' : f === 'kettlebell' ? '🔔 Kettlebell' : '🤸 Bodyweight'}
-            </button>
-          ))}
+          <button
+            className={`${styles.filterBtn}${equipmentFilter.size === 0 ? ` ${styles.filterBtnActive}` : ''}`}
+            onClick={() => setEquipmentFilter(new Set())}
+          >
+            All
+          </button>
+          <button
+            className={`${styles.filterBtn}${equipmentFilter.has('kettlebell') ? ` ${styles.filterBtnActive}` : ''}`}
+            onClick={() => toggleEquipment('kettlebell')}
+          >
+            🔔 Kettlebell
+          </button>
+          <button
+            className={`${styles.filterBtn}${equipmentFilter.has('bodyweight') ? ` ${styles.filterBtnActive}` : ''}`}
+            onClick={() => toggleEquipment('bodyweight')}
+          >
+            🤸 Bodyweight
+          </button>
         </div>
 
         {/* Muscle group filter */}
         <div className={styles.muscleRow}>
           <button
-            className={`${styles.muscleBtn}${muscleFilter === null ? ` ${styles.muscleBtnActive}` : ''}`}
-            onClick={() => setMuscleFilter(null)}
+            className={`${styles.muscleBtn}${muscleFilter.size === 0 ? ` ${styles.muscleBtnActive}` : ''}`}
+            onClick={() => setMuscleFilter(new Set())}
           >
             All
           </button>
           {MUSCLE_ORDER.map((m) => (
             <button
               key={m}
-              className={`${styles.muscleBtn}${muscleFilter === m ? ` ${styles.muscleBtnActive}` : ''}`}
-              onClick={() => setMuscleFilter(muscleFilter === m ? null : m)}
+              className={`${styles.muscleBtn}${muscleFilter.has(m) ? ` ${styles.muscleBtnSelected}` : ''}`}
+              style={{ background: MUSCLE_COLORS[m] + '30', color: MUSCLE_COLORS[m], borderColor: muscleFilter.has(m) ? MUSCLE_COLORS[m] : 'transparent' }}
+              onClick={() => toggleMuscle(m)}
             >
-              <span className={styles.muscleDot} style={{ background: MUSCLE_COLORS[m] }} />
               {MUSCLE_LABELS[m]}
             </button>
           ))}
         </div>
 
         {/* Exercise list */}
-        <div className={styles.list}>
+        <div className={styles.list} data-picker-list>
           <button
             className={`${styles.item}${value === '' ? ` ${styles.itemSelected}` : ''}`}
             onClick={() => { onSelect(''); onClose(); }}

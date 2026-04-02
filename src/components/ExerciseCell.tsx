@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getExerciseDef, getShortName } from '../exercises';
-import { MUSCLE_COLORS } from '../types';
+import { MUSCLE_COLORS_MUTED } from '../types';
 import { ExercisePicker } from './ExercisePicker';
 import styles from './ExerciseCell.module.css';
 
@@ -19,10 +19,9 @@ function getCellStyle(exerciseName: string): React.CSSProperties {
   if (!exerciseName) return {};
   const def = getExerciseDef(exerciseName);
   if (!def) return { background: '#555' };
-  const c1 = MUSCLE_COLORS[def.primary];
+  const c1 = MUSCLE_COLORS_MUTED[def.primary];
   if (def.secondary) {
-    const c2 = MUSCLE_COLORS[def.secondary];
-    return { background: `linear-gradient(135deg, ${c1} 50%, ${c2} 50%)` };
+    return { background: c1, overflow: 'hidden' as const };
   }
   return { background: c1 };
 }
@@ -39,6 +38,8 @@ export function ExerciseCell({
 }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const displayName = exerciseName ? getShortName(exerciseName) : '';
+  const def = getExerciseDef(exerciseName);
+  const hasSplit = !!(def?.secondary);
 
   const classNames = [
     styles.cell,
@@ -61,14 +62,22 @@ export function ExerciseCell({
         data-ex={exIdx}
         onClick={!editMode ? () => setPickerOpen(true) : undefined}
       >
-        {editMode ? (
-          <>
-            <span className={styles.dragHandle}>⠿</span>
-            <span className={styles.abbrText}>{displayName || '+'}</span>
-          </>
-        ) : (
-          exerciseName ? displayName : '+'
+        {hasSplit && (
+          <div
+            className={styles.splitOverlay}
+            style={{ background: MUSCLE_COLORS_MUTED[def!.secondary!] }}
+          />
         )}
+        <span className={styles.cellText}>
+          {editMode ? (
+            <>
+              <span className={styles.dragHandle}>⠿</span>
+              <span className={styles.abbrText}>{displayName || '+'}</span>
+            </>
+          ) : (
+            exerciseName ? displayName : '+'
+          )}
+        </span>
       </div>
       {pickerOpen && (
         <ExercisePicker

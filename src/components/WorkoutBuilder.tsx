@@ -83,6 +83,24 @@ export function WorkoutBuilder({ onStart }: Props) {
   const [dragSource, setDragSource] = useState<{ s: number; e: number } | null>(null);
   const [dragTarget, setDragTarget] = useState<{ s: number; e: number } | null>(null);
 
+  // Measure grid to determine how many cells fit per row
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [maxPerRow, setMaxPerRow] = useState(4);
+  useEffect(() => {
+    const el = gridRef.current;
+    if (!el) return;
+    const CELL_W = 64;
+    const GAP = 6;
+    const INDICATOR_W = 30; // 22px min-width + 8px gap
+    const update = () => {
+      const avail = el.clientWidth - INDICATOR_W;
+      setMaxPerRow(Math.max(1, Math.floor((avail + GAP) / (CELL_W + GAP))));
+    };
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   useEffect(() => {
     setSaved(loadWorkouts());
   }, []);
@@ -276,36 +294,61 @@ export function WorkoutBuilder({ onStart }: Props) {
         </div>
 
         <div
-          className={`${styles.grid}${editMode ? ` ${styles.gridEditMode}` : ''}`}
+          ref={gridRef}
+          className={styles.grid}
           onPointerDown={handleGridPointerDown}
           onPointerMove={handleGridPointerMove}
           onPointerUp={handleGridPointerUp}
           onPointerLeave={handleGridPointerUp}
-          style={editMode ? { touchAction: 'none' } : undefined}
         >
-          {workout.grid.map((row, s) => (
-            <div key={s} className={styles.setRow}>
-              <span className={styles.setLabel}>{s + 1}</span>
-              <div className={styles.setCells}>
-                {row.map((slot, e) => {
-                  const dupes = duplicatesMap.get(String(s));
-                  return (
-                    <ExerciseCell
-                      key={slot.id}
-                      exerciseName={slot.exerciseName}
-                      isDuplicate={!!(slot.exerciseName && dupes?.has(slot.exerciseName))}
-                      setIdx={s}
-                      exIdx={e}
-                      onChange={(name) => handleCellChange(s, e, name)}
-                      editMode={editMode}
-                      isSource={!!(dragSource && dragSource.s === s && dragSource.e === e)}
-                      isTarget={!!(dragTarget && dragTarget.s === s && dragTarget.e === e && dragSource && (dragSource.s !== s || dragSource.e !== e))}
-                    />
-                  );
-                })}
+          {workout.grid.map((row, s) => {
+            const dupes = duplicatesMap.get(String(s));
+            // Balanced row splitting: determine rows needed, then distribute evenly
+            const numRows = Math.ceil(row.length / maxPerRow);
+            const base = Math.floor(row.length / numRows);
+            const extra = row.length % numRows;
+            const subRows: typeof row[] = [];
+            let offset = 0;
+            for (let r = 0; r < numRows; r++) {
+              const count = base + (r < extra ? 1 : 0);
+              subRows.push(row.slice(offset, offset + count));
+              offset += count;
+            }
+            let cellOffset = 0;
+            return (
+              <div key={s} className={styles.setGroup}>
+                <div className={styles.setIndicator}>
+                  <span className={styles.setLabel}>{s + 1}</span>
+                </div>
+                <div className={styles.setContent}>
+                  {subRows.map((subRow, ri) => {
+                    const startIdx = cellOffset;
+                    cellOffset += subRow.length;
+                    return (
+                      <div key={ri} className={styles.setCells}>
+                        {subRow.map((slot, localE) => {
+                          const e = startIdx + localE;
+                          return (
+                            <ExerciseCell
+                              key={slot.id}
+                              exerciseName={slot.exerciseName}
+                              isDuplicate={!!(slot.exerciseName && dupes?.has(slot.exerciseName))}
+                              setIdx={s}
+                              exIdx={e}
+                              onChange={(name) => handleCellChange(s, e, name)}
+                              editMode={editMode}
+                              isSource={!!(dragSource && dragSource.s === s && dragSource.e === e)}
+                              isTarget={!!(dragTarget && dragTarget.s === s && dragTarget.e === e && dragSource && (dragSource.s !== s || dragSource.e !== e))}
+                            />
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
