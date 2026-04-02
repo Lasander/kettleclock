@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import type { ExerciseSlot } from '../types';
 import { MUSCLE_ORDER } from '../types';
-import { EXERCISE_LIBRARY, getExercisesByMuscle } from '../exercises';
+import { getEnabledExercises, getExercisesByMuscle } from '../exercises';
 import { generateId } from '../utils';
 import styles from './QuickFill.module.css';
 
@@ -65,8 +65,9 @@ export function QuickFill({ setsCount, exercisesPerSet, grid, onFill, onFillManu
     );
 
   const fillRandom = () => {
+    const allEnabled = getEnabledExercises();
     const usedGlobal = new Set(grid.flat().filter((s) => s.exerciseName).map((s) => s.exerciseName));
-    const pool = makePool(EXERCISE_LIBRARY, usedGlobal);
+    const pool = makePool(allEnabled, usedGlobal);
     const newGrid = grid.map((row) =>
       row.map((slot) => {
         if (slot.exerciseName) return slot;
@@ -78,11 +79,12 @@ export function QuickFill({ setsCount, exercisesPerSet, grid, onFill, onFillManu
   };
 
   const fillMusclePerSet = () => {
+    const allEnabled = getEnabledExercises();
     const usedGlobal = new Set(grid.flat().filter((s) => s.exerciseName).map((s) => s.exerciseName));
     const newGrid = grid.map((row, s) => {
       const muscle = MUSCLE_ORDER[s % MUSCLE_ORDER.length];
       const available = getExercisesByMuscle(muscle);
-      const basePool = available.length > 0 ? available : EXERCISE_LIBRARY;
+      const basePool = available.length > 0 ? available : allEnabled;
       const pool = makePool(basePool, usedGlobal);
       return row.map((slot) => {
         if (slot.exerciseName) return slot;
@@ -94,13 +96,14 @@ export function QuickFill({ setsCount, exercisesPerSet, grid, onFill, onFillManu
   };
 
   const fillAlternateMuscles = () => {
+    const allEnabled = getEnabledExercises();
     const usedGlobal = new Set(grid.flat().filter((s) => s.exerciseName).map((s) => s.exerciseName));
     const newGrid = grid.map((row) =>
       row.map((slot, e) => {
         if (slot.exerciseName) return slot;
         const muscle = MUSCLE_ORDER[e % MUSCLE_ORDER.length];
         const available = getExercisesByMuscle(muscle);
-        const basePool = available.length > 0 ? available : EXERCISE_LIBRARY;
+        const basePool = available.length > 0 ? available : allEnabled;
         const pool = makePool(basePool, usedGlobal);
         return { ...slot, exerciseName: nextPick(pool, usedGlobal) };
       })

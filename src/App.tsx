@@ -3,6 +3,7 @@ import type { Screen, Workout } from './types';
 import { WorkoutBuilder } from './components/WorkoutBuilder';
 import { Timer } from './components/Timer';
 import { Summary } from './components/Summary';
+import { ExerciseLibrary } from './components/ExerciseLibrary';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('setup');
@@ -31,6 +32,10 @@ export default function App() {
     setScreen('setup');
   };
 
+  if (screen === 'exerciseLibrary') {
+    return <ExerciseLibrary onBack={() => setScreen('setup')} />;
+  }
+
   if (screen === 'workout' && workout) {
     return <Timer key={Date.now()} workout={workout} onDone={handleDone} onAbort={handleAbort} />;
   }
@@ -41,5 +46,5 @@ export default function App() {
     );
   }
 
-  return <WorkoutBuilder onStart={handleStart} />;
+  return <WorkoutBuilder onStart={handleStart} onEditExercises={() => setScreen('exerciseLibrary')} />;
 }

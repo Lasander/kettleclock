@@ -1,0 +1,454 @@
+.container {
+  flex: 1;
+  padding: 0 16px 32px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0 14px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg);
+}
+
+.backBtn {
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  min-height: 36px;
+}
+
+.title {
+  flex: 1;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.addBtn {
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 8px 14px;
+  min-height: 36px;
+  border-radius: 20px;
+}
+
+/* ── Filters ─────────────────────────────────────────── */
+
+.filterRow {
+  display: flex;
+  gap: 6px;
+  padding: 6px 0;
+  flex-shrink: 0;
+}
+
+.filterBtn {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  border-radius: 14px;
+  min-height: 32px;
+  border: 2px solid transparent;
+}
+
+.filterBtnActive {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.muscleRow {
+  display: flex;
+  gap: 5px;
+  padding: 6px 0 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.muscleBtn {
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  padding: 5px 10px;
+  border-radius: 10px;
+  min-height: 28px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 2px solid transparent;
+  background: var(--color-surface);
+  flex-shrink: 0;
+}
+
+.muscleBtnActive {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.muscleBtnSelected {
+  border-style: solid;
+  border-width: 2px;
+  font-weight: 700;
+}
+
+/* ── Exercise list ───────────────────────────────────── */
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  border-bottom: 0.5px solid var(--color-separator);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.itemDisabled {
+  opacity: 0.45;
+}
+
+.itemMain {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px;
+  min-height: 48px;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.itemMain:active {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.itemDots {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+  width: 23px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.itemName {
+  flex: 1;
+  font-size: 0.88rem;
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemAbbr {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.itemEquip {
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.itemActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 10px;
+  flex-shrink: 0;
+}
+
+.duplicateBtn {
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  padding: 4px 8px;
+  min-height: 36px;
+  min-width: 36px;
+}
+
+/* Toggle switch */
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggleSlider {
+  position: absolute;
+  inset: 0;
+  background: #555;
+  border-radius: 13px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.toggleSlider::before {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  left: 2px;
+  bottom: 2px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.toggle input:checked + .toggleSlider {
+  background: var(--color-primary);
+}
+
+.toggle input:checked + .toggleSlider::before {
+  transform: translateX(18px);
+}
+
+.empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 32px 16px;
+  font-size: 0.85rem;
+}
+
+/* ── Edit / Add overlay ──────────────────────────────── */
+
+.editOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.editPanel {
+  background: var(--color-surface);
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: max(env(safe-area-inset-bottom), 16px);
+}
+
+.editHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px 10px;
+  border-bottom: 0.5px solid var(--color-separator);
+  flex-shrink: 0;
+}
+
+.editTitle {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.editClose {
+  background: transparent;
+  color: var(--color-text-muted);
+  padding: 6px 10px;
+  font-size: 1rem;
+  min-height: 36px;
+  min-width: 36px;
+}
+
+.editBody {
+  padding: 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+  margin-top: 14px;
+}
+
+.fieldLabel:first-child {
+  margin-top: 0;
+}
+
+.fieldInput {
+  width: 100%;
+  font-size: 0.95rem;
+  padding: 10px 14px;
+  background: var(--color-surface-elevated);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  color: var(--color-text);
+  min-height: 44px;
+}
+
+.fieldInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.fieldInputShort {
+  width: 100px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+}
+
+.fieldError {
+  border-color: var(--color-danger) !important;
+}
+
+.errorText {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--color-danger);
+  margin-top: 4px;
+}
+
+/* Equipment / segment toggle */
+.segmentRow {
+  display: flex;
+  gap: 6px;
+}
+
+.segmentBtn {
+  flex: 1;
+  background: var(--color-surface-elevated);
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 2px solid transparent;
+  min-height: 44px;
+}
+
+.segmentBtnActive {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+/* Muscle group grid */
+.muscleGrid {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.musclePick {
+  font-size: 0.75rem;
+  padding: 7px 12px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  min-height: 32px;
+  font-weight: 600;
+}
+
+.musclePickActive {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Action buttons */
+.editActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.saveBtn {
+  flex: 1;
+  background: var(--color-primary);
+  color: white;
+  font-size: 0.95rem;
+  padding: 13px;
+  border-radius: var(--radius);
+}
+
+.saveBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  background: var(--color-surface-elevated);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  padding: 13px 18px;
+  border-radius: var(--radius);
+}
+
+.deleteBtn {
+  background: var(--color-danger);
+  color: white;
+  font-size: 0.9rem;
+  padding: 13px 18px;
+  border-radius: var(--radius);
+}
+
+/* Delete confirmation */
+.confirmDialog {
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin: auto 20px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+}
+
+.confirmText {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}

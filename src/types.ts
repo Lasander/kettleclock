@@ -1,10 +1,15 @@
 export type MuscleGroup = 'legs' | 'core' | 'cardio' | 'fullBody' | 'arms' | 'chest' | 'shoulders' | 'back';
 
+export type Equipment = 'kettlebell' | 'bodyweight';
+
 export interface ExerciseDefinition {
   name: string;
   abbr: string;
   primary: MuscleGroup;
   secondary?: MuscleGroup;
+  equipment: Equipment;
+  builtin: boolean;
+  enabled: boolean;
 }
 
 export interface ExerciseSlot {
@@ -37,7 +42,7 @@ export interface Segment {
   exerciseIndex: number;
 }
 
-export type Screen = 'setup' | 'workout' | 'summary';
+export type Screen = 'setup' | 'exerciseLibrary' | 'workout' | 'summary';
 
 // Spectral order — adjacent groups share adjacent hues on the colour wheel
 export const MUSCLE_ORDER: MuscleGroup[] = [

@@ -14,6 +14,7 @@ import styles from './WorkoutBuilder.module.css';
 
 interface Props {
   onStart: (workout: Workout) => void;
+  onEditExercises: () => void;
 }
 
 function makeSlot(name = ''): ExerciseSlot {
@@ -72,7 +73,7 @@ function migrateWorkout(w: any): Workout {
   };
 }
 
-export function WorkoutBuilder({ onStart }: Props) {
+export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
   const [workout, setWorkout] = useState<Workout>(newWorkout);
   const [saved, setSaved] = useState<Workout[]>([]);
   const [showOverrides, setShowOverrides] = useState(false);
@@ -410,6 +411,9 @@ export function WorkoutBuilder({ onStart }: Props) {
         </button>
         <button className={styles.toggleBtn} onClick={() => setShowOverrides((s) => !s)}>
           {showOverrides ? 'Hide overrides ▴' : 'Per-exercise timing ▾'}
+        </button>
+        <button className={styles.toggleBtn} onClick={onEditExercises}>
+          📋 Exercises
         </button>
       </div>
 

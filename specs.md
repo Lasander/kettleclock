@@ -9,6 +9,7 @@ KettleClock is a mobile-friendly web app for timing kettlebell (and bodyweight) 
 | Phase | Description |
 |---|---|
 | **Setup** | Configure and save workouts; the main planning grid |
+| **Exercise Library** | Manage all exercises: add, edit, duplicate, toggle visibility |
 | **Workout** | Active timer screen counting through segments |
 | **Summary** | Post-workout results; option to repeat or return to Setup |
 
@@ -26,11 +27,14 @@ A workout is a **grid** of `S` sets × `E` exercises per set. Each cell is an ex
 
 ### Exercise Library
 
-A built-in library of **kettlebell and bodyweight exercises**, each with:
+A unified library of **kettlebell and bodyweight exercises**, combining built-in defaults with user-created entries. Each exercise has:
 - Full name and **abbreviation** (2–3 letters)
 - **Primary muscle group** (and optional secondary)
+- **Equipment type**: `kettlebell` or `bodyweight`
+- **Built-in flag**: whether the exercise ships with the app or was user-created
+- **Enabled flag**: whether it appears in the exercise picker during workout setup
 
-The library is defined in a single source file (`exercises.ts`) for easy editing — adding or modifying exercises requires only changing that file.
+Both default and custom exercises follow the same data model. Default exercises are seeded on first launch and stored in `localStorage` alongside user-created ones. Users can hide defaults they don't need and add exercises tailored to their routine.
 
 ### Muscle Groups
 
@@ -82,6 +86,7 @@ Hidden behind a toggle. Each exercise slot can optionally override its own durat
   - **Long press any cell → enter reorder mode**; in reorder mode, drag any cell to any other position across the whole grid to swap
   - Tap a "Done" button or long-press again to exit reorder mode
 - **Quick Fill** menu:
+  - Fill manually (walk through empty slots one by one)
   - Random
   - Muscle group per set (each set targets one group)
   - Alternate muscles (rotate groups within each set)
@@ -89,8 +94,48 @@ Hidden behind a toggle. Each exercise slot can optionally override its own durat
 - Default timing controls (exercise, rest, set rest)
 - Optional "Advanced timing" toggle for per-exercise overrides
 - Save / load / delete workouts (local storage)
+- **"Edit Exercises" button** navigates to the Exercise Library Editor
 
-### 2. Workout Phase
+### 2. Exercise Library Editor
+
+Accessible from the Setup phase via a dedicated button. Manages the full list of exercises available for workout building.
+
+#### Viewing
+- Shows all exercises (defaults + custom) in a scrollable list
+- Each row shows: colour dot(s) for muscle groups, name, abbreviation, equipment icon, and an enable/disable toggle
+- Filterable by equipment type (Kettlebell / Bodyweight) and muscle group, same as the exercise picker
+
+#### Adding Exercises
+- **"Add Exercise" button** opens an edit form to create from scratch
+- **Duplicate button** on any existing exercise creates a copy with "(copy)" appended, ready for editing
+- New exercise form fields:
+  - Name (required, must be unique)
+  - Abbreviation (2–3 characters, auto-suggested from name)
+  - Primary muscle group (required, select from the eight groups)
+  - Secondary muscle group (optional)
+  - Equipment type (kettlebell or bodyweight)
+
+#### Editing Exercises
+- Tap any exercise row to open it for editing
+- All fields are editable for both default and custom exercises
+- Changes take effect immediately (auto-saved)
+
+#### Enabling / Disabling
+- Each exercise has a toggle switch to control whether it appears in the exercise picker
+- Disabled exercises are visually dimmed but remain in the library
+- Exercises already assigned to a workout grid continue to work even if later disabled
+
+#### Deleting
+- Custom exercises show a delete option
+- Built-in default exercises cannot be deleted but can be disabled
+- Deletion requires confirmation
+
+#### Persistence
+- The full exercise library (defaults + custom, with enabled state) is stored in `localStorage` under a dedicated key
+- On first launch, the library is seeded from the built-in defaults with all exercises enabled
+- The stored library is the single source of truth at runtime
+
+### 3. Workout Phase
 
 - **Initial countdown** before the first exercise
 - Full-screen display optimised for glanceability
@@ -106,7 +151,7 @@ Hidden behind a toggle. Each exercise slot can optionally override its own durat
   - Previous returns to the start of the previous segment (useful if a segment was accidentally skipped)
 - Abort requires confirmation
 
-### 3. Summary Phase
+### 4. Summary Phase
 
 - Total elapsed time
 - Sets × exercises completed

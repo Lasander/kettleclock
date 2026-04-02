@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { EXERCISE_LIBRARY, EQUIPMENT_MAP, getShortName } from '../exercises';
+import { getEnabledExercises, getShortName } from '../exercises';
 import { MUSCLE_COLORS, MUSCLE_LABELS, MUSCLE_ORDER } from '../types';
-import type { MuscleGroup } from '../types';
+import type { MuscleGroup, Equipment } from '../types';
 import styles from './ExercisePicker.module.css';
 
 interface Props {
@@ -14,12 +14,12 @@ interface Props {
   keepOpen?: boolean;
 }
 
-type Equipment = 'kettlebell' | 'bodyweight';
-
 export function ExercisePicker({ value, onSelect, onClose, title = 'Select Exercise', filledNames, inSetNames, keepOpen }: Props) {
   const [equipmentFilter, setEquipmentFilter] = useState<Set<Equipment>>(new Set());
   const [muscleFilter, setMuscleFilter] = useState<Set<MuscleGroup>>(new Set());
   const overlayRef = useRef<HTMLDivElement>(null);
+
+  const enabledExercises = useMemo(() => getEnabledExercises(), []);
 
   // Block body scrolling while picker is open
   useEffect(() => {
@@ -62,12 +62,12 @@ export function ExercisePicker({ value, onSelect, onClose, title = 'Select Exerc
   };
 
   const filtered = useMemo(() => {
-    return EXERCISE_LIBRARY.filter((ex) => {
-      if (equipmentFilter.size > 0 && !equipmentFilter.has(EQUIPMENT_MAP.get(ex.name)!)) return false;
+    return enabledExercises.filter((ex) => {
+      if (equipmentFilter.size > 0 && !equipmentFilter.has(ex.equipment)) return false;
       if (muscleFilter.size > 0 && !muscleFilter.has(ex.primary) && !(ex.secondary && muscleFilter.has(ex.secondary))) return false;
       return true;
     });
-  }, [equipmentFilter, muscleFilter]);
+  }, [enabledExercises, equipmentFilter, muscleFilter]);
 
   return (
     <div className={styles.overlay} ref={overlayRef} onClick={onClose}>
