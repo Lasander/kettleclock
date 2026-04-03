@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#000000"/>
+
+  <!-- Kettlebell body -->
+  <circle cx="256" cy="290" r="130" fill="#e94560"/>
+
+  <!-- Handle arch -->
+  <path d="M 170,265 Q 170,140 256,140 Q 342,140 342,265"
+        stroke="#e94560" stroke-width="48" stroke-linecap="round" fill="none"/>
+
+  <!-- Handle collar (flat band at base of handle) -->
+  <rect x="164" y="245" width="184" height="36" rx="18" fill="#c03050"/>
+
+  <!-- Clock face on kettlebell body -->
+  <circle cx="256" cy="300" r="80" fill="#ffffff" opacity="0.95"/>
+
+  <!-- Clock hour ticks -->
+  <line x1="256" y1="228" x2="256" y2="242" stroke="#111111" stroke-width="5" stroke-linecap="round"/>
+  <line x1="256" y1="358" x2="256" y2="372" stroke="#111111" stroke-width="5" stroke-linecap="round"/>
+  <line x1="184" y1="300" x2="198" y2="300" stroke="#111111" stroke-width="5" stroke-linecap="round"/>
+  <line x1="314" y1="300" x2="328" y2="300" stroke="#111111" stroke-width="5" stroke-linecap="round"/>
+  <!-- 2 o'clock -->
+  <line x1="314" y1="235" x2="307" y2="247" stroke="#111111" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- 4 o'clock -->
+  <line x1="314" y1="365" x2="307" y2="353" stroke="#111111" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- 8 o'clock -->
+  <line x1="198" y1="365" x2="205" y2="353" stroke="#111111" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- 10 o'clock -->
+  <line x1="198" y1="235" x2="205" y2="247" stroke="#111111" stroke-width="3.5" stroke-linecap="round"/>
+
+  <!-- Clock hands — pointing roughly to 10:10 (classic watch position) -->
+  <!-- Hour hand (pointing to ~10) -->
+  <line x1="256" y1="300" x2="218" y2="262" stroke="#111111" stroke-width="7" stroke-linecap="round"/>
+  <!-- Minute hand (pointing to ~2 / top-right) -->
+  <line x1="256" y1="300" x2="291" y2="255" stroke="#111111" stroke-width="5" stroke-linecap="round"/>
+  <!-- Center dot -->
+  <circle cx="256" cy="300" r="6" fill="#e94560"/>
+</svg>
