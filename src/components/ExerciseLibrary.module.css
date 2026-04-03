@@ -15,6 +15,7 @@
   align-items: center;
   gap: 10px;
   padding: 14px 0 14px;
+  padding-top: max(env(safe-area-inset-top), 14px);
   position: sticky;
   top: 0;
   z-index: 10;

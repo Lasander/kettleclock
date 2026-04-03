@@ -29,7 +29,7 @@ describe('exercises', () => {
         expect(ex.primary).toBeTruthy();
         expect(typeof ex.builtin).toBe('boolean');
         expect(typeof ex.enabled).toBe('boolean');
-        expect(['kettlebell', 'bodyweight']).toContain(ex.equipment);
+        expect(['kettlebell', 'bodyweight', 'either']).toContain(ex.equipment);
       }
     });
   });

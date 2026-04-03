@@ -46,5 +46,5 @@ export default function App() {
     );
   }
 
-  return <WorkoutBuilder onStart={handleStart} onEditExercises={() => setScreen('exerciseLibrary')} />;
+  return <WorkoutBuilder onStart={handleStart} onEditExercises={() => setScreen('exerciseLibrary')} initialWorkout={workout ?? undefined} />;
 }

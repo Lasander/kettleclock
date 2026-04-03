@@ -8,6 +8,7 @@ interface Props {
   setIdx: number;
   exIdx: number;
   onTap?: () => void;
+  onClear?: () => void;
   editMode?: boolean;
   isSource?: boolean;
   isTarget?: boolean;
@@ -31,6 +32,7 @@ export function ExerciseCell({
   setIdx,
   exIdx,
   onTap,
+  onClear,
   editMode,
   isSource,
   isTarget,
@@ -71,6 +73,14 @@ export function ExerciseCell({
         {editMode ? (
           <>
             <span className={styles.dragHandle}>⠿</span>
+            {exerciseName && onClear && (
+              <button
+                className={styles.clearBtn}
+                data-clear=""
+                onClick={(e) => { e.stopPropagation(); onClear(); }}
+                aria-label="Clear exercise"
+              >×</button>
+            )}
             <span className={styles.abbrText}>{displayName || '+'}</span>
           </>
         ) : (

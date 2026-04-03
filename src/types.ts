@@ -1,6 +1,6 @@
 export type MuscleGroup = 'legs' | 'core' | 'cardio' | 'fullBody' | 'arms' | 'chest' | 'shoulders' | 'back';
 
-export type Equipment = 'kettlebell' | 'bodyweight';
+export type Equipment = 'kettlebell' | 'bodyweight' | 'either';
 
 export interface ExerciseDefinition {
   name: string;

@@ -61,7 +61,7 @@ export function ExerciseLibrary({ onBack }: Props) {
 
   const filtered = useMemo(() => {
     return library.filter((ex) => {
-      if (equipmentFilter.size > 0 && !equipmentFilter.has(ex.equipment)) return false;
+      if (equipmentFilter.size > 0 && !equipmentFilter.has(ex.equipment) && ex.equipment !== 'either') return false;
       if (muscleFilter.size > 0 && !muscleFilter.has(ex.primary) && !(ex.secondary && muscleFilter.has(ex.secondary))) return false;
       return true;
     });
@@ -212,7 +212,7 @@ export function ExerciseLibrary({ onBack }: Props) {
                 {ex.secondary && <span className={styles.dot} style={{ background: MUSCLE_COLORS[ex.secondary] }} />}
               </span>
               <span className={styles.itemName}>{ex.name}</span>
-              <span className={styles.itemEquip}>{ex.equipment === 'kettlebell' ? '🔔' : '🤸'}</span>
+              <span className={styles.itemEquip}>{ex.equipment === 'kettlebell' ? '🔔' : ex.equipment === 'either' ? '🔔🤸' : '🤸'}</span>
             </div>
             <div className={styles.itemActions}>
               <button
@@ -271,6 +271,10 @@ export function ExerciseLibrary({ onBack }: Props) {
                   className={`${styles.segmentBtn}${editing.equipment === 'bodyweight' ? ` ${styles.segmentBtnActive}` : ''}`}
                   onClick={() => setEditing({ ...editing, equipment: 'bodyweight' })}
                 >🤸 Bodyweight</button>
+                <button
+                  className={`${styles.segmentBtn}${editing.equipment === 'either' ? ` ${styles.segmentBtnActive}` : ''}`}
+                  onClick={() => setEditing({ ...editing, equipment: 'either' })}
+                >🔔🤸 Either</button>
               </div>
 
               {/* Primary muscle */}

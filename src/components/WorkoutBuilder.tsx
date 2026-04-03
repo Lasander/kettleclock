@@ -14,6 +14,7 @@ import styles from './WorkoutBuilder.module.css';
 interface Props {
   onStart: (workout: Workout) => void;
   onEditExercises: () => void;
+  initialWorkout?: Workout;
 }
 
 function makeSlot(name = ''): ExerciseSlot {
@@ -77,15 +78,15 @@ function gridHasExercises(grid: ExerciseSlot[][]): boolean {
   return grid.some((row) => row.some((s) => !!s.exerciseName));
 }
 
-export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
-  const [workout, setWorkout] = useState<Workout>(newWorkout);
+export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Props) {
+  const [workout, setWorkout] = useState<Workout>(() => initialWorkout ?? newWorkout());
   const [saved, setSaved] = useState<Workout[]>([]);
   const [showDetails, setShowDetails] = useState(false);
   const [showSavedPanel, setShowSavedPanel] = useState(false);
 
   // Track the last-saved version to detect unsaved changes
-  const [lastSavedId, setLastSavedId] = useState<string | null>(null);
-  const [lastSavedUpdatedAt, setLastSavedUpdatedAt] = useState<number | null>(null);
+  const [lastSavedId, setLastSavedId] = useState<string | null>(() => initialWorkout?.id ?? null);
+  const [lastSavedUpdatedAt, setLastSavedUpdatedAt] = useState<number | null>(() => initialWorkout?.updatedAt ?? null);
 
   // Hamburger menu
   const [menuOpen, setMenuOpen] = useState(false);
@@ -104,6 +105,13 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
   const dragTargetRef = useRef<{ s: number; e: number } | null>(null);
   const [dragSource, setDragSource] = useState<{ s: number; e: number } | null>(null);
   const [dragTarget, setDragTarget] = useState<{ s: number; e: number } | null>(null);
+  const [undoSnapshot, setUndoSnapshot] = useState<ExerciseSlot[][] | null>(null);
+
+  // Long-press to enter edit mode
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressStartPos = useRef<{ x: number; y: number } | null>(null);
+  const LONG_PRESS_MS = 500;
+  const LONG_PRESS_MOVE_TOLERANCE = 10;
 
   // Measure grid to determine how many cells fit per row
   const gridRef = useRef<HTMLDivElement>(null);
@@ -223,7 +231,27 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
   );
 
   // ── Edit mode grid drag ──────────────────────────────────────────────
+  const saveUndo = useCallback(() => {
+    setUndoSnapshot(workout.grid.map(row => row.map(slot => ({ ...slot }))));
+  }, [workout.grid]);
+
+  const clearCell = useCallback((s: number, e: number) => {
+    saveUndo();
+    updateWorkout((w) => {
+      const grid = w.grid.map((row) => [...row]);
+      grid[s][e] = { ...grid[s][e], exerciseName: '', duration: undefined, restAfter: undefined };
+      return { ...w, grid };
+    });
+  }, [saveUndo, updateWorkout]);
+
+  const handleUndo = useCallback(() => {
+    if (!undoSnapshot) return;
+    updateWorkout((w) => ({ ...w, grid: undoSnapshot }));
+    setUndoSnapshot(null);
+  }, [undoSnapshot, updateWorkout]);
+
   const swapCells = useCallback((src: { s: number; e: number }, dst: { s: number; e: number }) => {
+    saveUndo();
     updateWorkout((w) => {
       const grid = w.grid.map((row) => [...row]);
       const tmp = grid[src.s][src.e];
@@ -231,21 +259,44 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
       grid[dst.s][dst.e] = tmp;
       return { ...w, grid };
     });
-  }, [updateWorkout]);
+  }, [saveUndo, updateWorkout]);
 
   const handleGridPointerDown = useCallback((e: React.PointerEvent) => {
-    if (!editMode) return;
+    // Skip if tapping clear button
+    if ((e.target as Element).closest('[data-clear]')) return;
+
     const cell = (e.target as Element).closest('[data-cell]') as HTMLElement | null;
     if (!cell) return;
-    const pos = { s: Number(cell.dataset.set), e: Number(cell.dataset.ex) };
-    dragSourceRef.current = pos;
-    dragTargetRef.current = pos;
-    setDragSource(pos);
-    setDragTarget(pos);
+
+    if (editMode) {
+      const pos = { s: Number(cell.dataset.set), e: Number(cell.dataset.ex) };
+      dragSourceRef.current = pos;
+      dragTargetRef.current = pos;
+      setDragSource(pos);
+      setDragTarget(pos);
+    } else {
+      // Long-press to enter edit mode
+      longPressStartPos.current = { x: e.clientX, y: e.clientY };
+      longPressTimerRef.current = setTimeout(() => {
+        setEditMode(true);
+        longPressTimerRef.current = null;
+      }, LONG_PRESS_MS);
+    }
   }, [editMode]);
 
   const handleGridPointerMove = useCallback((e: React.PointerEvent) => {
-    if (!editMode || !dragSourceRef.current) return;
+    if (!editMode) {
+      if (longPressTimerRef.current && longPressStartPos.current) {
+        const dx = e.clientX - longPressStartPos.current.x;
+        const dy = e.clientY - longPressStartPos.current.y;
+        if (Math.sqrt(dx * dx + dy * dy) > LONG_PRESS_MOVE_TOLERANCE) {
+          clearTimeout(longPressTimerRef.current);
+          longPressTimerRef.current = null;
+        }
+      }
+      return;
+    }
+    if (!dragSourceRef.current) return;
     const el = document.elementFromPoint(e.clientX, e.clientY);
     const cell = el?.closest('[data-cell]') as HTMLElement | null;
     if (cell) {
@@ -256,6 +307,10 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
   }, [editMode]);
 
   const handleGridPointerUp = useCallback(() => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
     const src = dragSourceRef.current;
     const tgt = dragTargetRef.current;
     if (src && tgt && (src.s !== tgt.s || src.e !== tgt.e)) {
@@ -296,6 +351,7 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
     setLastSavedUpdatedAt(loaded.updatedAt);
     setShowDetails(false);
     setEditMode(false);
+    setUndoSnapshot(null);
   };
 
   const handleDelete = (id: string) => {
@@ -330,6 +386,7 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
     setLastSavedUpdatedAt(null);
     setShowDetails(false);
     setEditMode(false);
+    setUndoSnapshot(null);
     setNewFlowStep(null);
   };
 
@@ -344,10 +401,64 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
     setLastSavedUpdatedAt(null);
     setShowDetails(false);
     setEditMode(false);
+    setUndoSnapshot(null);
     setNewFlowStep(null);
   };
 
   const canStart = workout.setsCount > 0 && workout.exercisesPerSet > 0;
+
+  const renderGridContent = () => (
+    <>
+      {workout.grid.map((row, s) => {
+        const dupes = duplicatesMap.get(String(s));
+        const numRows = Math.ceil(row.length / maxPerRow);
+        const base = Math.floor(row.length / numRows);
+        const extra = row.length % numRows;
+        const subRows: typeof row[] = [];
+        let offset = 0;
+        for (let r = 0; r < numRows; r++) {
+          const count = base + (r < extra ? 1 : 0);
+          subRows.push(row.slice(offset, offset + count));
+          offset += count;
+        }
+        let cellOffset = 0;
+        return (
+          <div key={s} className={styles.setGroup}>
+            <div className={styles.setIndicator}>
+              <span className={styles.setLabel}>{s + 1}</span>
+            </div>
+            <div className={styles.setContent}>
+              {subRows.map((subRow, ri) => {
+                const startIdx = cellOffset;
+                cellOffset += subRow.length;
+                return (
+                  <div key={ri} className={styles.setCells}>
+                    {subRow.map((slot, localE) => {
+                      const e = startIdx + localE;
+                      return (
+                        <ExerciseCell
+                          key={slot.id}
+                          exerciseName={slot.exerciseName}
+                          isDuplicate={!!(slot.exerciseName && dupes?.has(slot.exerciseName))}
+                          setIdx={s}
+                          exIdx={e}
+                          onTap={() => setSlotEditor({ setIdx: s, exIdx: e })}
+                          onClear={editMode ? () => clearCell(s, e) : undefined}
+                          editMode={editMode}
+                          isSource={!!(dragSource && dragSource.s === s && dragSource.e === e)}
+                          isTarget={!!(dragTarget && dragTarget.s === s && dragTarget.e === e && dragSource && (dragSource.s !== s || dragSource.e !== e))}
+                        />
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </>
+  );
 
   return (
     <div className={styles.container}>
@@ -423,12 +534,11 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
           <span className={styles.gridLabel}>Exercise Grid</span>
           <div className={styles.gridActions}>
             <button
-              className={`${styles.reorderBtn}${editMode ? ` ${styles.reorderBtnActive}` : ''}`}
-              onClick={() => setEditMode((m) => !m)}
+              className={styles.reorderBtn}
+              onClick={() => setEditMode(true)}
             >
-              {editMode ? '✓ Done' : '↕ Reorder'}
+              ↕ Swap/Clear
             </button>
-
           </div>
         </div>
 
@@ -449,53 +559,7 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
           onPointerUp={handleGridPointerUp}
           onPointerLeave={handleGridPointerUp}
         >
-          {workout.grid.map((row, s) => {
-            const dupes = duplicatesMap.get(String(s));
-            const numRows = Math.ceil(row.length / maxPerRow);
-            const base = Math.floor(row.length / numRows);
-            const extra = row.length % numRows;
-            const subRows: typeof row[] = [];
-            let offset = 0;
-            for (let r = 0; r < numRows; r++) {
-              const count = base + (r < extra ? 1 : 0);
-              subRows.push(row.slice(offset, offset + count));
-              offset += count;
-            }
-            let cellOffset = 0;
-            return (
-              <div key={s} className={styles.setGroup}>
-                <div className={styles.setIndicator}>
-                  <span className={styles.setLabel}>{s + 1}</span>
-                </div>
-                <div className={styles.setContent}>
-                  {subRows.map((subRow, ri) => {
-                    const startIdx = cellOffset;
-                    cellOffset += subRow.length;
-                    return (
-                      <div key={ri} className={styles.setCells}>
-                        {subRow.map((slot, localE) => {
-                          const e = startIdx + localE;
-                          return (
-                            <ExerciseCell
-                              key={slot.id}
-                              exerciseName={slot.exerciseName}
-                              isDuplicate={!!(slot.exerciseName && dupes?.has(slot.exerciseName))}
-                              setIdx={s}
-                              exIdx={e}
-                              onTap={() => setSlotEditor({ setIdx: s, exIdx: e })}
-                              editMode={editMode}
-                              isSource={!!(dragSource && dragSource.s === s && dragSource.e === e)}
-                              isTarget={!!(dragTarget && dragTarget.s === s && dragTarget.e === e && dragSource && (dragSource.s !== s || dragSource.e !== e))}
-                            />
-                          );
-                        })}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+          {renderGridContent()}
         </div>
       </div>
 
@@ -509,6 +573,49 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
           Start Workout
         </button>
       </div>
+
+      {/* Edit mode full-screen overlay */}
+      {editMode && (
+        <div className={styles.editOverlay}>
+          <div className={styles.editOverlayHeader}>
+            <span className={styles.editOverlayTitle}>Swap / Clear</span>
+            <div className={styles.editOverlayActions}>
+              {undoSnapshot && (
+                <button className={styles.undoBtn} onClick={handleUndo}>
+                  ↩ Undo
+                </button>
+              )}
+              <button
+                className={`${styles.reorderBtn} ${styles.reorderBtnActive}`}
+                onClick={() => { setEditMode(false); setUndoSnapshot(null); }}
+              >
+                ✓ Done
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.legend} style={{ flexShrink: 0 }}>
+            {MUSCLE_ORDER.map((m) => (
+              <span key={m} className={styles.legendItem}>
+                <span className={styles.legendDot} style={{ background: MUSCLE_COLORS[m] }} />
+                {MUSCLE_LABELS[m]}
+              </span>
+            ))}
+          </div>
+
+          <div
+            className={styles.editOverlayGrid}
+            onPointerDown={handleGridPointerDown}
+            onPointerMove={handleGridPointerMove}
+            onPointerUp={handleGridPointerUp}
+            onPointerLeave={handleGridPointerUp}
+          >
+            <div className={styles.grid}>
+              {renderGridContent()}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Slot editor */}
       {slotEditor && (

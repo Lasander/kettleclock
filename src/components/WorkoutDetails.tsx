@@ -90,8 +90,9 @@ export function WorkoutDetails({ workout, onOverride, onClose }: WorkoutDetailsP
   return (
     <div className={styles.overlay}>
       <div className={styles.header}>
+        <button className={styles.backBtn} onClick={onClose}>← Back</button>
         <span className={styles.headerTitle}>Workout Details</span>
-        <button className={styles.closeBtn} onClick={onClose}>✕</button>
+        <div style={{ width: 60 }} />
       </div>
       <div className={styles.list}>
         {workout.grid.map((row, s) => (

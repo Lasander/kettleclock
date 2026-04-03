@@ -50,13 +50,13 @@ const DEFAULT_EXERCISES: Omit<ExerciseDefinition, 'builtin' | 'enabled'>[] = [
   { name: 'Pull-Up',                        primary: 'back',      secondary: 'arms',      equipment: 'bodyweight' },
   { name: 'Chin-Up',                        primary: 'arms',      secondary: 'back',      equipment: 'bodyweight' },
   { name: 'Dip',                            primary: 'chest',     secondary: 'arms',      equipment: 'bodyweight' },
-  { name: 'Sit-Up',                         primary: 'core',                              equipment: 'bodyweight' },
+  { name: 'Sit-Up',                         primary: 'core',                              equipment: 'either' },
   { name: 'Crunch',                         primary: 'core',                              equipment: 'bodyweight' },
   { name: 'Leg Raise',                      primary: 'core',                              equipment: 'bodyweight' },
-  { name: 'Glute Bridge',                   primary: 'legs',      secondary: 'core',      equipment: 'bodyweight' },
-  { name: 'Squat',                          primary: 'legs',                              equipment: 'bodyweight' },
-  { name: 'Lunge',                          primary: 'legs',                              equipment: 'bodyweight' },
-  { name: 'Burpee',                         primary: 'cardio',    secondary: 'fullBody',  equipment: 'bodyweight' },
+  { name: 'Glute Bridge',                   primary: 'legs',      secondary: 'core',      equipment: 'either' },
+  { name: 'Squat',                          primary: 'legs',                              equipment: 'either' },
+  { name: 'Lunge',                          primary: 'legs',                              equipment: 'either' },
+  { name: 'Burpee',                         primary: 'cardio',    secondary: 'fullBody',  equipment: 'either' },
   { name: 'Mountain Climber',               primary: 'cardio',    secondary: 'core',      equipment: 'bodyweight' },
   { name: 'Jump Squat',                     primary: 'cardio',    secondary: 'legs',      equipment: 'bodyweight' },
   { name: 'Jumping Jack',                   primary: 'cardio',                             equipment: 'bodyweight' },
@@ -81,11 +81,13 @@ function migrateExercise(e: any): ExerciseDefinition {
     name: e.name,
     primary: e.primary,
     secondary: e.secondary,
-    equipment: e.equipment ?? defaultMatch?.equipment ?? (
-      e.name.startsWith('Kettlebell ') ||
-      ['Goblet Squat', 'Turkish Get-Up', 'Clean & Press', 'Snatch', 'Figure 8'].includes(e.name)
-        ? 'kettlebell' : 'bodyweight'
-    ),
+    equipment: (e.equipment === 'kettlebell' || e.equipment === 'bodyweight' || e.equipment === 'either')
+      ? e.equipment
+      : defaultMatch?.equipment ?? (
+          e.name.startsWith('Kettlebell ') ||
+          ['Goblet Squat', 'Turkish Get-Up', 'Clean & Press', 'Snatch', 'Figure 8'].includes(e.name)
+            ? 'kettlebell' : 'bodyweight'
+        ),
     builtin: e.builtin ?? !!defaultMatch,
     enabled: e.enabled ?? true,
   };

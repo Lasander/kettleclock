@@ -4,8 +4,6 @@ import { MUSCLE_COLORS, MUSCLE_COLORS_MUTED, MUSCLE_LABELS, MUSCLE_ORDER } from 
 import { getEnabledExercises, getExerciseDef, getShortName } from '../exercises';
 import styles from './SlotEditor.module.css';
 
-type FillMode = 'fillEmpty' | 'overwrite';
-
 interface SlotEditorProps {
   grid: ExerciseSlot[][];
   initialSetIdx: number;
@@ -15,13 +13,15 @@ interface SlotEditorProps {
 }
 
 export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, onClose }: SlotEditorProps) {
-  const [mode, setMode] = useState<FillMode>('fillEmpty');
+  const [overwriteMode, setOverwriteMode] = useState(false);
   const [activeSetIdx, setActiveSetIdx] = useState(initialSetIdx);
   const [activeExIdx, setActiveExIdx] = useState(initialExIdx);
   const [equipmentFilter, setEquipmentFilter] = useState<Set<Equipment>>(new Set());
   const [muscleFilter, setMuscleFilter] = useState<Set<MuscleGroup>>(new Set());
+  const [menuOpen, setMenuOpen] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   // Local mirror of exercise names for immediate strip updates
   const [localNames, setLocalNames] = useState<string[][]>(() =>
@@ -86,6 +86,22 @@ export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, on
     scrollToActive(activeFlatIndex);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Close menu on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: MouseEvent | TouchEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, [menuOpen]);
+
   // Computed: names used anywhere in grid, and names used in current set
   const filledNames = useMemo(() => {
     const names = new Set<string>();
@@ -124,7 +140,7 @@ export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, on
 
   const filtered = useMemo(() => {
     return enabledExercises.filter((ex) => {
-      if (equipmentFilter.size > 0 && !equipmentFilter.has(ex.equipment)) return false;
+      if (equipmentFilter.size > 0 && !equipmentFilter.has(ex.equipment) && ex.equipment !== 'either') return false;
       if (muscleFilter.size > 0 && !muscleFilter.has(ex.primary) && !(ex.secondary && muscleFilter.has(ex.secondary))) return false;
       return true;
     });
@@ -145,7 +161,7 @@ export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, on
     const currentFlat = activeFlatIndex;
     let nextFlat: number | null = null;
 
-    if (mode === 'overwrite') {
+    if (overwriteMode) {
       nextFlat = (currentFlat + 1) % totalSlots;
     } else {
       // fillEmpty: find next empty slot, wrapping around
@@ -165,8 +181,7 @@ export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, on
         }
 
         if (found === null) {
-          // No more empty slots — schedule close
-          requestAnimationFrame(() => onClose());
+          // No more empty slots — stay on current slot
         } else {
           const next = flatSlots[found];
           requestAnimationFrame(() => {
@@ -187,7 +202,7 @@ export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, on
       setActiveExIdx(next.e);
       scrollToActive(nextFlat);
     }
-  }, [activeSetIdx, activeExIdx, activeFlatIndex, flatSlots, totalSlots, mode, onUpdateSlot, onClose, scrollToActive]);
+  }, [activeSetIdx, activeExIdx, activeFlatIndex, flatSlots, totalSlots, overwriteMode, onUpdateSlot, scrollToActive]);
 
   // Handle tap on slot strip cell
   const handleSlotTap = useCallback((s: number, e: number, flatIdx: number) => {
@@ -232,26 +247,48 @@ export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, on
         {/* Header */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>
-            <span className={styles.title}>Select Exercises</span>
-            <button className={styles.clearBtn} onClick={handleClearAll}>Clear All</button>
+            <span className={styles.title}>Select Exercise</span>
           </div>
-          <button className={styles.closeBtn} onClick={onClose}>✕</button>
-        </div>
-
-        {/* Mode toggle */}
-        <div className={styles.modeToggle}>
-          <button
-            className={`${styles.modeBtn}${mode === 'fillEmpty' ? ` ${styles.modeBtnActive}` : ''}`}
-            onClick={() => setMode('fillEmpty')}
-          >
-            Fill Empty
-          </button>
-          <button
-            className={`${styles.modeBtn}${mode === 'overwrite' ? ` ${styles.modeBtnActive}` : ''}`}
-            onClick={() => setMode('overwrite')}
-          >
-            Overwrite All
-          </button>
+          <div className={styles.headerRight}>
+            <div className={styles.menuWrapper} ref={menuRef}>
+              <button className={styles.menuBtn} onClick={() => setMenuOpen(o => !o)} aria-label="Options">
+                ⋯
+              </button>
+              {menuOpen && (
+                <div className={styles.pickerMenu}>
+                  <label className={styles.pickerMenuItem}>
+                    <input
+                      type="checkbox"
+                      checked={overwriteMode}
+                      onChange={(e) => setOverwriteMode(e.target.checked)}
+                    />
+                    <span>Overwrite filled</span>
+                  </label>
+                  <div className={styles.pickerMenuSep} />
+                  <div className={styles.pickerMenuLabel}>Equipment</div>
+                  <div className={styles.pickerMenuFilters}>
+                    <button
+                      className={`${styles.filterBtn}${equipmentFilter.size === 0 ? ` ${styles.filterBtnActive}` : ''}`}
+                      onClick={() => setEquipmentFilter(new Set())}
+                    >All</button>
+                    <button
+                      className={`${styles.filterBtn}${equipmentFilter.has('kettlebell') ? ` ${styles.filterBtnActive}` : ''}`}
+                      onClick={() => toggleEquipment('kettlebell')}
+                    >🔔 Kettlebell</button>
+                    <button
+                      className={`${styles.filterBtn}${equipmentFilter.has('bodyweight') ? ` ${styles.filterBtnActive}` : ''}`}
+                      onClick={() => toggleEquipment('bodyweight')}
+                    >🤸 Bodyweight</button>
+                  </div>
+                  <div className={styles.pickerMenuSep} />
+                  <button className={styles.pickerMenuDanger} onClick={() => { handleClearAll(); setMenuOpen(false); }}>
+                    Clear All
+                  </button>
+                </div>
+              )}
+            </div>
+            <button className={styles.closeBtn} onClick={onClose}>✕</button>
+          </div>
         </div>
 
         {/* Slot strip */}
@@ -290,27 +327,7 @@ export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, on
           </div>
         </div>
 
-        {/* Equipment filter */}
-        <div className={styles.filterRow}>
-          <button
-            className={`${styles.filterBtn}${equipmentFilter.size === 0 ? ` ${styles.filterBtnActive}` : ''}`}
-            onClick={() => setEquipmentFilter(new Set())}
-          >
-            All
-          </button>
-          <button
-            className={`${styles.filterBtn}${equipmentFilter.has('kettlebell') ? ` ${styles.filterBtnActive}` : ''}`}
-            onClick={() => toggleEquipment('kettlebell')}
-          >
-            🔔 Kettlebell
-          </button>
-          <button
-            className={`${styles.filterBtn}${equipmentFilter.has('bodyweight') ? ` ${styles.filterBtnActive}` : ''}`}
-            onClick={() => toggleEquipment('bodyweight')}
-          >
-            🤸 Bodyweight
-          </button>
-        </div>
+
 
         {/* Muscle group filter */}
         <div className={styles.muscleRow}>

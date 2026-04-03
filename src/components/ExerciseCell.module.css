@@ -99,6 +99,27 @@
   z-index: 2;
 }
 
+.clearBtn {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 50%;
+  z-index: 3;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
 .abbrText {
   font-size: 0.6rem;
   font-weight: 700;
