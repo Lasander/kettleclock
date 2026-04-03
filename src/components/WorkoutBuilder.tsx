@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import type { Workout, ExerciseSlot } from '../types';
 import { MUSCLE_COLORS, MUSCLE_LABELS, MUSCLE_ORDER } from '../types';
 import { loadWorkouts, saveWorkout, deleteWorkout } from '../storage';
+import { buildSegments } from '../segments';
 import { generateId } from '../utils';
 import { resumeAudio } from '../audio';
 import { Logo } from './Logo';
@@ -76,6 +77,14 @@ function migrateWorkout(w: any): Workout {
 /** Does the grid contain any assigned exercises? */
 function gridHasExercises(grid: ExerciseSlot[][]): boolean {
   return grid.some((row) => row.some((s) => !!s.exerciseName));
+}
+
+function formatTotalTime(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  if (m === 0) return `${s}s`;
+  if (s === 0) return `${m}m`;
+  return `${m}m ${s}s`;
 }
 
 export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Props) {
@@ -407,6 +416,11 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
 
   const canStart = workout.setsCount > 0 && workout.exercisesPerSet > 0;
 
+  const totalTime = useMemo(() => {
+    const segs = buildSegments(workout);
+    return segs.reduce((sum, s) => sum + s.duration, 0);
+  }, [workout]);
+
   const renderGridContent = () => (
     <>
       {workout.grid.map((row, s) => {
@@ -570,7 +584,7 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
           onClick={() => { resumeAudio(); onStart(workout); }}
           disabled={!canStart}
         >
-          Start Workout
+          Start Workout · {formatTotalTime(totalTime)}
         </button>
       </div>
 

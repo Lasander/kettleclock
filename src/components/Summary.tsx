@@ -1,4 +1,6 @@
+import { useMemo } from 'react';
 import type { Workout } from '../types';
+import { buildSegments } from '../segments';
 import styles from './Summary.module.css';
 
 interface Props {
@@ -15,6 +17,20 @@ function formatDuration(seconds: number): string {
 }
 
 export function Summary({ workout, elapsed, onAgain, onBack }: Props) {
+  const { exerciseTime, restTime } = useMemo(() => {
+    const segs = buildSegments(workout);
+    let exercise = 0;
+    let rest = 0;
+    for (const seg of segs) {
+      if (seg.type === 'exercise') {
+        exercise += seg.duration;
+      } else {
+        rest += seg.duration;
+      }
+    }
+    return { exerciseTime: exercise, restTime: rest };
+  }, [workout]);
+
   return (
     <div className={styles.container}>
       <div className={styles.trophy}>🏆</div>
@@ -22,6 +38,10 @@ export function Summary({ workout, elapsed, onAgain, onBack }: Props) {
       <div className={styles.stats}>
         <div>
           <strong>{formatDuration(elapsed)}</strong> total time
+        </div>
+        <div>
+          <strong>{formatDuration(exerciseTime)}</strong> exercise &middot;{' '}
+          <strong>{formatDuration(restTime)}</strong> rest
         </div>
         <div>
           <strong>{workout.setsCount}</strong> sets &times; <strong>{workout.exercisesPerSet}</strong>{' '}

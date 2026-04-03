@@ -40,19 +40,11 @@
   justify-content: center;
 }
 
-.phase {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--color-text-muted);
-  margin-bottom: 8px;
-}
-
-.label {
+.title {
   font-size: clamp(1.5rem, 6vw, 2.5rem);
   font-weight: 700;
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   letter-spacing: -0.02em;
 }
 
@@ -65,6 +57,10 @@
   font-variant-numeric: tabular-nums;
 }
 
+.timeLong {
+  font-size: clamp(72px, 20vw, 160px);
+}
+
 .progress {
   font-size: 0.9rem;
   color: var(--color-text-muted);
@@ -73,7 +69,7 @@
 }
 
 .upNext {
-  font-size: 1rem;
+  font-size: 1.15rem;
   color: rgba(255, 255, 255, 0.7);
   text-align: center;
   margin-bottom: 12px;
@@ -94,7 +90,7 @@
 }
 
 .upNextItem {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: rgba(255, 255, 255, 0.8);
   background: rgba(255, 255, 255, 0.1);
   padding: 3px 10px;
@@ -112,14 +108,22 @@
 }
 
 .pauseBtn {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(251, 191, 36, 0.2);
   color: white;
-  padding: 14px 32px;
-  font-size: 1.05rem;
+  padding: 24px 32px;
+  font-size: 1.15rem;
   border-radius: var(--radius-lg);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   width: 100%;
+}
+
+.pauseBtnResume {
+  background: rgba(74, 222, 128, 0.25);
+}
+
+.pauseBtn:active {
+  opacity: 0.8;
 }
 
 .navRow {
@@ -129,7 +133,7 @@
 }
 
 .prevBtn {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(100, 149, 237, 0.2);
   color: white;
   padding: 14px 20px;
   border-radius: var(--radius-lg);
@@ -137,11 +141,15 @@
 }
 
 .skipBtn {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(100, 149, 237, 0.2);
   color: white;
   padding: 14px 20px;
   border-radius: var(--radius-lg);
   flex: 1;
+}
+
+.prevBtn:active, .skipBtn:active {
+  opacity: 0.8;
 }
 
 .abortBtn {

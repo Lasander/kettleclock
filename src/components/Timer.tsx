@@ -126,14 +126,14 @@ export function Timer({ workout, onDone, onAbort }: Props) {
 
   if (!seg) return null;
 
-  const phaseLabel =
+  const titleText =
     seg.type === 'exercise'
-      ? 'Exercise'
+      ? seg.label
       : seg.type === 'exerciseRest'
         ? 'Rest'
         : seg.type === 'setRest'
-          ? 'Set Rest'
-          : 'Get Ready';
+          ? 'Recovery'
+          : 'Get ready';
 
   // Map initialCountdown → exerciseRest for colour styling (blue)
   const phaseData = seg.type === 'initialCountdown' ? 'exerciseRest' : seg.type;
@@ -181,9 +181,8 @@ export function Timer({ workout, onDone, onAbort }: Props) {
         </div>
       )}
       <div className={styles.info}>
-        <div className={styles.phase}>{phaseLabel}</div>
-        <div className={styles.label}>{seg.label}</div>
-        <div className={styles.time} aria-live="polite" aria-atomic="true">
+        <div className={styles.title}>{titleText}</div>
+        <div className={`${styles.time}${formatTime(remaining).length >= 4 ? ` ${styles.timeLong}` : ''}`} aria-live="polite" aria-atomic="true">
           {formatTime(remaining)}
         </div>
         <div className={styles.progress}>
@@ -204,15 +203,15 @@ export function Timer({ workout, onDone, onAbort }: Props) {
         )}
       </div>
       <div className={styles.controls}>
-        <button className={styles.pauseBtn} onClick={() => setPaused((p) => !p)}>
+        <button className={`${styles.pauseBtn}${paused ? ` ${styles.pauseBtnResume}` : ''}`} onClick={() => setPaused((p) => !p)}>
           {paused ? '▶ Resume' : '⏸ Pause'}
         </button>
         <div className={styles.navRow}>
           <button className={styles.prevBtn} onClick={goBack} aria-label="Previous segment">
-            ◀ Prev
+            ⏪ Prev
           </button>
           <button className={styles.skipBtn} onClick={advance}>
-            Skip ▶
+            Skip ⏩
           </button>
         </div>
         <button className={styles.abortBtn} onClick={handleAbort}>
