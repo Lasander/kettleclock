@@ -11,6 +11,7 @@ interface Props {
   editMode?: boolean;
   isSource?: boolean;
   isTarget?: boolean;
+  size?: 'normal' | 'small';
 }
 
 function getCellStyle(exerciseName: string): React.CSSProperties {
@@ -33,6 +34,7 @@ export function ExerciseCell({
   editMode,
   isSource,
   isTarget,
+  size,
 }: Props) {
   const displayName = exerciseName ? getShortName(exerciseName) : '';
   const def = getExerciseDef(exerciseName);
@@ -40,6 +42,7 @@ export function ExerciseCell({
 
   const classNames = [
     styles.cell,
+    size === 'small' && styles.cellSmall,
     !exerciseName && styles.empty,
     isDuplicate && styles.duplicate,
     editMode && styles.editMode,

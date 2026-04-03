@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import type { Workout, ExerciseSlot } from '../types';
 import { MUSCLE_COLORS, MUSCLE_LABELS, MUSCLE_ORDER } from '../types';
-import { getShortName } from '../exercises';
 import { loadWorkouts, saveWorkout, deleteWorkout } from '../storage';
 import { generateId } from '../utils';
 import { resumeAudio } from '../audio';
@@ -9,6 +8,7 @@ import { Logo } from './Logo';
 import { ExerciseCell } from './ExerciseCell';
 import { NumberControl } from './NumberControl';
 import { SlotEditor } from './SlotEditor';
+import { WorkoutDetails } from './WorkoutDetails';
 import styles from './WorkoutBuilder.module.css';
 
 interface Props {
@@ -80,7 +80,7 @@ function gridHasExercises(grid: ExerciseSlot[][]): boolean {
 export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
   const [workout, setWorkout] = useState<Workout>(newWorkout);
   const [saved, setSaved] = useState<Workout[]>([]);
-  const [showOverrides, setShowOverrides] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [showSavedPanel, setShowSavedPanel] = useState(false);
 
   // Track the last-saved version to detect unsaved changes
@@ -294,7 +294,7 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
     setWorkout(loaded);
     setLastSavedId(loaded.id);
     setLastSavedUpdatedAt(loaded.updatedAt);
-    setShowOverrides(false);
+    setShowDetails(false);
     setEditMode(false);
   };
 
@@ -328,7 +328,7 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
     setWorkout(w);
     setLastSavedId(null);
     setLastSavedUpdatedAt(null);
-    setShowOverrides(false);
+    setShowDetails(false);
     setEditMode(false);
     setNewFlowStep(null);
   };
@@ -342,7 +342,7 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
     setWorkout(dup);
     setLastSavedId(null);
     setLastSavedUpdatedAt(null);
-    setShowOverrides(false);
+    setShowDetails(false);
     setEditMode(false);
     setNewFlowStep(null);
   };
@@ -377,8 +377,8 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
                 📂 Saved Workouts{saved.length > 0 ? ` (${saved.length})` : ''}
               </button>
               <div className={styles.menuSep} />
-              <button className={styles.menuItem} onClick={() => { setShowOverrides((s) => !s); setMenuOpen(false); }}>
-                ⏱ {showOverrides ? 'Hide' : 'Per-exercise'} Timing
+              <button className={styles.menuItem} onClick={() => { setShowDetails(true); setMenuOpen(false); }}>
+                ⏱ Workout Details
               </button>
               <button className={styles.menuItem} onClick={() => { onEditExercises(); setMenuOpen(false); }}>
                 📋 Exercise Library
@@ -393,12 +393,15 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
         <input
           className={styles.nameInput}
           type="text"
-          autoComplete="off"
+          name="workout-name-xkcd"
+          autoComplete="one-time-code"
           autoCorrect="off"
-          autoCapitalize="off"
+          autoCapitalize="sentences"
           spellCheck={false}
+          enterKeyHint="done"
           value={workout.name}
           onChange={(e) => updateWorkout((w) => ({ ...w, name: e.target.value }))}
+          onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
           placeholder="Workout name"
         />
       </div>
@@ -496,50 +499,6 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
         </div>
       </div>
 
-      {showOverrides && (
-        <div className={styles.overridesSection}>
-          <div className={styles.overridesTitle}>Per-Exercise Overrides</div>
-          {workout.grid.map((row, s) =>
-            row.map((slot, eIdx) => {
-              const label = slot.exerciseName
-                ? `S${s + 1} E${eIdx + 1}: ${getShortName(slot.exerciseName)}`
-                : `S${s + 1} E${eIdx + 1}: (empty)`;
-              return (
-                <div key={slot.id} className={styles.overrideRow}>
-                  <span className={styles.overrideLabel}>{label}</span>
-                  <input
-                    className={styles.overrideInput}
-                    type="number"
-                    inputMode="numeric"
-                    min={1}
-                    placeholder={String(workout.defaultExerciseDuration)}
-                    value={slot.duration ?? ''}
-                    onChange={(ev) => {
-                      const v = ev.target.value === '' ? undefined : Math.max(1, Number(ev.target.value));
-                      handleCellOverride(s, eIdx, 'duration', v);
-                    }}
-                  />
-                  <span className={styles.overrideUnit}>s</span>
-                  <input
-                    className={styles.overrideInput}
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    placeholder={String(workout.defaultExerciseRest)}
-                    value={slot.restAfter ?? ''}
-                    onChange={(ev) => {
-                      const v = ev.target.value === '' ? undefined : Math.max(0, Number(ev.target.value));
-                      handleCellOverride(s, eIdx, 'restAfter', v);
-                    }}
-                  />
-                  <span className={styles.overrideUnit}>s rest</span>
-                </div>
-              );
-            })
-          )}
-        </div>
-      )}
-
       {/* Start button — always visible at bottom */}
       <div className={styles.actions}>
         <button
@@ -559,6 +518,15 @@ export function WorkoutBuilder({ onStart, onEditExercises }: Props) {
           initialExIdx={slotEditor.exIdx}
           onUpdateSlot={handleSlotUpdate}
           onClose={() => setSlotEditor(null)}
+        />
+      )}
+
+      {/* Workout details overlay */}
+      {showDetails && (
+        <WorkoutDetails
+          workout={workout}
+          onOverride={handleCellOverride}
+          onClose={() => setShowDetails(false)}
         />
       )}
 

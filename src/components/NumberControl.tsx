@@ -7,6 +7,7 @@ interface Props {
   min?: number;
   max?: number;
   suffix?: string;
+  muted?: boolean;
   onChange: (value: number) => void;
 }
 
@@ -90,7 +91,7 @@ function Numpad({ label, value, min, max, suffix, onChange, onClose }: {
   );
 }
 
-export function NumberControl({ label, value, min = 0, max = 999, suffix, onChange }: Props) {
+export function NumberControl({ label, value, min = 0, max = 999, suffix, muted, onChange }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -98,7 +99,7 @@ export function NumberControl({ label, value, min = 0, max = 999, suffix, onChan
       <div className={styles.wrapper}>
         <span className={styles.label}>{label}</span>
         <button
-          className={`${styles.display}${open ? ` ${styles.displayActive}` : ''}`}
+          className={`${styles.display}${open ? ` ${styles.displayActive}` : ''}${muted ? ` ${styles.displayMuted}` : ''}`}
           onClick={() => setOpen(true)}
           aria-label={`${label}: ${value}. Tap to edit`}
         >

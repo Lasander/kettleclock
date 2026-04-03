@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 14px 0 18px;
+  padding: 10px 0 12px;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -83,7 +83,7 @@
 }
 
 .title {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.02em;
@@ -203,6 +203,7 @@
 }
 
 .nameSection {
+  margin-top: 4px;
   margin-bottom: 20px;
 }
 
@@ -348,57 +349,6 @@
 }
 
 /* (toolbar removed — actions now in hamburger menu + grid header) */
-
-.overridesSection {
-  margin-bottom: 16px;
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  padding: 16px;
-}
-
-.overridesTitle {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 10px;
-}
-
-.overrideRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 0;
-  border-bottom: 0.5px solid var(--color-separator);
-  font-size: 0.85rem;
-}
-
-.overrideRow:last-child {
-  border-bottom: none;
-}
-
-.overrideLabel {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.overrideInput {
-  width: 56px;
-  text-align: center;
-  padding: 6px 4px;
-  font-size: 0.8rem;
-  min-height: 36px;
-  border-radius: 8px;
-  background: var(--color-surface-elevated);
-}
-
-.overrideUnit {
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
-}
 
 .actions {
   display: flex;

@@ -1,0 +1,155 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg);
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 0.5px solid var(--color-separator);
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.closeBtn {
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 1.2rem;
+  padding: 6px 10px;
+  min-height: 36px;
+  min-width: 36px;
+  border: none;
+}
+
+.backBtn {
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 0.95rem;
+  padding: 6px 10px;
+  min-height: 36px;
+  border: none;
+}
+
+.headerSlotLabel {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 16px max(env(safe-area-inset-bottom), 32px);
+}
+
+.setDivider {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 16px 0 6px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid var(--color-separator);
+  cursor: pointer;
+  min-height: 48px;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.rowName {
+  flex: 1;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.rowTimes {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.rowTime {
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.rowTimeMuted {
+  color: var(--color-text-muted);
+}
+
+.rowTimeLabel {
+  font-size: 0.6rem;
+  color: var(--color-text-muted);
+  margin-left: 1px;
+}
+
+/* Edit sub-view */
+.editContent {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 24px 16px max(env(safe-area-inset-bottom), 32px);
+}
+
+.editGroup {
+  margin-bottom: 24px;
+}
+
+.editGroupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.editGroupLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.defaultBtn {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  padding: 6px 14px;
+  border-radius: 14px;
+  min-height: 28px;
+  border: none;
+}
+
+.defaultBtnActive {
+  background: var(--color-primary);
+  color: white;
+}
+
+.editControlWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+
