@@ -149,6 +149,33 @@ At runtime the timer:
 3. Fires half-time beep at midpoint of each exercise segment
 4. On segment end → advance to next; on last segment end → show Summary
 
+### Timer Display
+
+Single title line with four variants based on segment type:
+- **"Get ready"** — initial countdown
+- **Exercise name** (e.g. "Swing") — exercise segment
+- **"Rest"** — exercise rest
+- **"Recovery"** — set rest
+
+Time display uses an adaptive font size: the default large size scales via `clamp(96px, 28vw, 220px)`, with a smaller variant (`clamp(72px, 20vw, 160px)`) applied when the formatted time is 4+ characters (e.g. "1:23").
+
+"Up next" text at 1.15rem is shown during rest phases. During exercise rest it shows the next exercise name; during set rest it lists all exercises in the upcoming set.
+
+### Timer Controls
+
+Control buttons use colour tinting:
+- **Pause/Resume** — double-height button (`24px` vertical padding); amber tint (`rgba(251, 191, 36, 0.2)`) for pause, green tint (`rgba(74, 222, 128, 0.25)`) for resume
+- **⏪ Prev / Skip ⏩** — blue tint (`rgba(100, 149, 237, 0.2)`); equal-width in a flex row
+- **Abort** — transparent background, danger colour
+
+### Start Button Total Time
+
+The “Start Workout” button in `WorkoutBuilder` displays the calculated total workout duration (e.g. “Start Workout · 25m 30s”). Computed via `buildSegments(workout)` summing all segment durations, memoised on workout changes.
+
+### Summary Breakdown
+
+`Summary` uses `buildSegments` to calculate planned exercise time vs rest time (initial countdown + exercise rest + set rest). Displayed alongside the actual elapsed wall-clock time.
+
 ## Screens & Navigation
 
 Simple state machine (no router library needed):
@@ -166,7 +193,7 @@ When aborting, the workout object is passed back to the Builder via `initialWork
 
 ## Responsive / Mobile Strategy
 
-- Base font size 16 px; timer digits scale with `clamp()` (minimum ~72 px)
+- Base font size 16 px; timer digits scale with `clamp()` — large default with adaptive smaller size for 4+ character times
 - Single-column layout; no horizontal scrolling
 - Touch targets ≥ 48 × 48 px with adequate spacing
 - Timer screen goes near-fullscreen (hides builder chrome)

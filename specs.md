@@ -101,7 +101,7 @@ The underlying data model is unchanged — `ExerciseSlot` still uses optional `d
 - Name the workout
 - Set **number of sets** and **exercises per set** (sizes the grid)
 - **Number controls**: show a large readable number; tap to edit
-- **Setup screen layout**: uses full viewport height (`100dvh`). The exercise grid scrolls vertically within its space. The "Start Workout" button is always visible at the bottom.
+- **Setup screen layout**: uses full viewport height (`100dvh`). The exercise grid scrolls vertically within its space. The "Start Workout" button is always visible at the bottom and shows the **calculated total workout time** (e.g. "Start Workout · 25m 30s"), computed from `buildSegments`.
 - **Visual exercise grid** (coloured rectangles):
   - Tap any cell → opens the **Slot Editor** (full-screen overlay for assigning exercises)
   - Duplicate assignments flagged visually
@@ -173,7 +173,10 @@ Accessible from the Setup phase via the hamburger menu. Manages the full list of
 
 - **Initial countdown** before the first exercise
 - Full-screen display optimised for glanceability
-- Shows: segment label, time remaining (large), set/exercise progress
+- **Title**: single line showing one of four variants — "Get ready" (initial countdown), exercise name (exercise), "Rest" (exercise rest), "Recovery" (set rest)
+- **Time display**: large countdown using adaptive font size — smaller for times with 4+ characters (e.g. "1:23") to prevent overflow
+- Set/exercise progress indicator below the time
+- **"Up next" label** (1.15rem) shown during rest phases: displays the next exercise name, or during set rest shows the full list of exercises in the upcoming set
 - **Ending-soon indicator**: visual flash + audio when ≤ 3 s remain in an exercise
 - Colour-coded phases: Green (exercise) · Blue (rest) · Orange (set rest)
 - Audio cues:
@@ -181,14 +184,16 @@ Accessible from the Setup phase via the hamburger menu. Manages the full list of
   - 3-2-1 ending beeps near the end of each exercise
   - Half-time beep at the midpoint of each exercise
   - Distinct sound when set rest starts
-- Controls: **Pause/Resume · ◀ Previous · Skip ▶ · Abort**
-  - Previous returns to the start of the previous segment (useful if a segment was accidentally skipped)
-- Abort requires confirmation
+- **Controls**:
+  - **Pause/Resume** — double-height button; amber tint when paused, green tint when resumable
+  - **⏪ Prev / Skip ⏩** — navigation buttons with blue tint; Prev returns to start of previous segment
+  - **Abort** — requires confirmation
 - **Abort preserves state**: aborting returns to Setup with the workout configuration preserved (grid, timing, name)
 
 ### 4. Summary Phase
 
 - Total elapsed time
+- **Exercise vs rest breakdown**: planned exercise time and rest/recovery time shown alongside the total
 - Sets × exercises completed
 - Option to re-run or return to Setup
 
