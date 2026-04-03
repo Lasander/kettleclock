@@ -69,9 +69,18 @@ Each exercise cell is a **coloured rectangle** showing a short name:
 
 All defaults are editable per-workout.
 
-### Per-Exercise Overrides (Advanced)
+### Per-Exercise Overrides (Workout Details)
 
-Hidden behind a toggle. Each exercise slot can optionally override its own duration and rest-after.
+Accessible via **"Workout Details"** in the hamburger menu on the Setup page. Opens a full-screen overlay showing a vertical list of all exercises grouped by set. Each row displays:
+- A small colour-coded exercise cell
+- The exercise short name
+- Two time badges: exercise duration and rest-after time
+
+Default values appear in a muted/dimmed colour; custom overrides appear in normal colour.
+
+Tapping any row opens an edit sub-view with NumberControl widgets for exercise time and rest-after time. Each field has a **"Default" toggle button** — when active, the slot uses the workout-level default and the control is visually muted. Setting a custom value deactivates the default toggle.
+
+The underlying data model is unchanged — `ExerciseSlot` still uses optional `duration` and `restAfter` fields, where `undefined` means "use workout default".
 
 ## Features
 
@@ -99,13 +108,14 @@ Hidden behind a toggle. Each exercise slot can optionally override its own durat
   - Tap any slot in the strip to jump to it directly
   - Auto-advance wraps from the last slot back to the first
 - Default timing controls (exercise, rest, set rest)
-- Optional "Advanced timing" toggle for per-exercise overrides
+- **Hamburger menu** with:
+  - **"Workout Details"**: opens a full-screen overlay for per-exercise timing overrides (see Per-Exercise Overrides section)
+  - Edit Exercises (navigates to Exercise Library Editor)
 - Save / load / delete workouts (local storage)
-- **"Edit Exercises" button** navigates to the Exercise Library Editor
 
 ### 2. Exercise Library Editor
 
-Accessible from the Setup phase via a dedicated button. Manages the full list of exercises available for workout building.
+Accessible from the Setup phase via the hamburger menu. Manages the full list of exercises available for workout building.
 
 #### Viewing
 - Shows all exercises (defaults + custom) in a scrollable list

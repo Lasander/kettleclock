@@ -47,6 +47,8 @@ kettleclock/
 │   │   ├── QuickFill.module.css
 │   │   ├── SlotEditor.tsx          # Full-screen slot editor overlay
 │   │   ├── SlotEditor.module.css
+│   │   ├── WorkoutDetails.tsx      # Per-exercise timing overlay
+│   │   ├── WorkoutDetails.module.css
 │   │   ├── Timer.tsx               # Active workout timer screen
 │   │   ├── Timer.module.css
 │   │   ├── Summary.tsx             # Post-workout summary
