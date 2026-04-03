@@ -60,7 +60,9 @@ kettleclock/
 ## Data Model
 
 ```typescript
-type MuscleGroup = 'legs' | 'back' | 'shoulders' | 'core' | 'fullBody';
+type MuscleGroup = 'legs' | 'core' | 'cardio' | 'fullBody' | 'arms' | 'chest' | 'shoulders' | 'back';
+
+type Equipment = 'kettlebell' | 'bodyweight' | 'either';
 
 interface ExerciseDefinition {
   name: string;
@@ -156,9 +158,11 @@ Simple state machine (no router library needed):
 │  Builder  │ ───────> │ Timer │ ───────> │ Summary │
 └──────────┘           └───────┘           └─────────┘
      ^                      │ abort             │
-     └──────────────────────┘                   │
-     └──────────────────────────────────────────┘
+     └──────────────────────┘ (keeps workout)    │
+     └────────────────────────────────────────────┘
 ```
+
+When aborting, the workout object is passed back to the Builder via `initialWorkout` prop, preserving the grid and timing configuration.
 
 ## Responsive / Mobile Strategy
 
@@ -166,10 +170,12 @@ Simple state machine (no router library needed):
 - Single-column layout; no horizontal scrolling
 - Touch targets ≥ 48 × 48 px with adequate spacing
 - Timer screen goes near-fullscreen (hides builder chrome)
-- CSS `env(safe-area-inset-*)` for notched phones
-- **Number controls**: show large value by default; tap to reveal edit input
-- **Grid cells**: tap to open Slot Editor, touch-drag to reorder within a set
-- CSS avoids features unsupported on mobile Safari (e.g. `color-mix` → use hex fallbacks)
+- CSS `env(safe-area-inset-*)` for notched phones — all full-screen views (WorkoutDetails, ExerciseLibrary, Summary, Timer, Swap/Clear overlay) respect `safe-area-inset-top`
+- **Setup screen**: uses `100dvh` for full viewport height; exercise grid scrolls vertically; "Start Workout" button pinned at bottom
+- **Swap/Clear mode**: full-screen overlay with animated entry; cells show × to clear, drag to swap, undo for last action
+- **Number controls**: show large value by default; tap to reveal edit input; pending digit indicator uses green (`#4ade80`)
+- **Grid cells**: tap to open Slot Editor, long-press to enter Swap/Clear mode
+- **WorkoutDetails**: uses "← Back" button (not ✕) for navigation
 
 ## Audio Strategy
 

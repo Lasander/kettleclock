@@ -30,11 +30,23 @@ A workout is a **grid** of `S` sets × `E` exercises per set. Each cell is an ex
 A unified library of **kettlebell and bodyweight exercises**, combining built-in defaults with user-created entries. Each exercise has:
 - Full name
 - **Primary muscle group** (and optional secondary)
-- **Equipment type**: `kettlebell` or `bodyweight`
+- **Equipment type**: `kettlebell`, `bodyweight`, or `either` (usable with or without kettlebell)
 - **Built-in flag**: whether the exercise ships with the app or was user-created
 - **Enabled flag**: whether it appears in the exercise picker during workout setup
 
 Both default and custom exercises follow the same data model. Default exercises are seeded on first launch and stored in `localStorage` alongside user-created ones. Users can hide defaults they don't need and add exercises tailored to their routine.
+
+### Equipment Types
+
+Three equipment classifications:
+
+| Type | Icon | Description |
+|---|---|---|
+| Kettlebell | 🔔 | Requires a kettlebell |
+| Bodyweight | 🤸 | No equipment needed |
+| Either | 🔔🤸 | Usable with or without a kettlebell (e.g. Sit-Up, Burpee, Lunge, Squat, Glute Bridge) |
+
+Exercises tagged `either` appear under both the kettlebell and bodyweight equipment filters. The `either` option is selectable when adding or editing exercises in the library.
 
 ### Muscle Groups
 
@@ -89,22 +101,28 @@ The underlying data model is unchanged — `ExerciseSlot` still uses optional `d
 - Name the workout
 - Set **number of sets** and **exercises per set** (sizes the grid)
 - **Number controls**: show a large readable number; tap to edit
+- **Setup screen layout**: uses full viewport height (`100dvh`). The exercise grid scrolls vertically within its space. The "Start Workout" button is always visible at the bottom.
 - **Visual exercise grid** (coloured rectangles):
   - Tap any cell → opens the **Slot Editor** (full-screen overlay for assigning exercises)
   - Duplicate assignments flagged visually
-  - **Long press any cell → enter reorder mode**; in reorder mode, drag any cell to any other position across the whole grid to swap
-  - Tap a "Done" button or long-press again to exit reorder mode
+  - **Long press any cell → enter Swap/Clear mode**
+- **Swap/Clear mode** (full-screen overlay with animated entry):
+  - Drag any cell to any other position across the whole grid to swap
+  - Each cell shows a **× icon** to clear that individual exercise
+  - **Undo button** reverts the last swap or clear action
+  - Tap **"Done"** to exit
 - **Slot Editor** (full-screen overlay):
   - **Slot strip**: horizontally scrollable row of all grid cells flattened across sets
     - Set boundary labels (S1, S2, …) above each group of cells
     - Visual dividers between sets
     - Active slot highlighted with a red border
     - Cells show muted muscle-group colours matching the main grid
-  - **Mode toggle**: "Fill Empty" (default) and "Overwrite All"
-    - Fill Empty: after selecting an exercise, auto-advances to the next empty slot; auto-closes when no empty slots remain
-    - Overwrite All: after selecting, advances to the next slot sequentially (wraps around); never auto-closes
-  - **Exercise list** below the strip: equipment filter, muscle group filter, scrollable list of enabled exercises with colour dots and in-set/in-grid indicators
-  - **Clear All** button in the header resets all slots to empty
+  - **Default mode** (Fill Empty): after selecting an exercise, auto-advances to the next empty slot. When all slots are filled, the picker **stays open** (does not auto-close) so the user can continue reassigning.
+  - **"Overwrite filled" checkbox** in the **⋯ options menu**: when checked, advances to the next slot sequentially (wraps around) regardless of whether it's filled.
+  - **⋯ options menu** also contains:
+    - **Equipment filter** (All / 🔔 Kettlebell / 🤸 Bodyweight)
+    - **Clear All** button to reset all slots to empty
+  - **Exercise list** below the strip: muscle group filter chips, scrollable list of enabled exercises with colour dots and in-set/in-grid indicators
   - Tap any slot in the strip to jump to it directly
   - Auto-advance wraps from the last slot back to the first
 - Default timing controls (exercise, rest, set rest)
@@ -129,7 +147,7 @@ Accessible from the Setup phase via the hamburger menu. Manages the full list of
   - Name (required, must be unique)
   - Primary muscle group (required, select from the eight groups)
   - Secondary muscle group (optional)
-  - Equipment type (kettlebell or bodyweight)
+  - Equipment type (kettlebell, bodyweight, or either)
 
 #### Editing Exercises
 - Tap any exercise row to open it for editing
@@ -166,6 +184,7 @@ Accessible from the Setup phase via the hamburger menu. Manages the full list of
 - Controls: **Pause/Resume · ◀ Previous · Skip ▶ · Abort**
   - Previous returns to the start of the previous segment (useful if a segment was accidentally skipped)
 - Abort requires confirmation
+- **Abort preserves state**: aborting returns to Setup with the workout configuration preserved (grid, timing, name)
 
 ### 4. Summary Phase
 
@@ -177,6 +196,7 @@ Accessible from the Setup phase via the hamburger menu. Manages the full list of
 
 - **Mobile-first**: fully usable on phones ≥ 320 px wide
 - **Touch-optimised**: large tap targets (≥ 48 px), native pickers, pointer-event drag
+- **Safe area**: all full-screen views (WorkoutDetails, ExerciseLibrary, Summary, Timer, Swap/Clear overlay) respect `env(safe-area-inset-top)` for notched phones
 - **Offline-capable**: no server; all data in `localStorage`
 - **No account / auth**: single-user, local-only
 - **Portable**: static site, any HTTP server or `file://`
