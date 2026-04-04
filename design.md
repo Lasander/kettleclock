@@ -26,9 +26,10 @@ kettleclock/
 │   ├── App.tsx                     # Root: routes between Builder, Timer, Summary
 │   ├── types.ts                    # Shared TypeScript types
 │   ├── exercises.ts                # Exercise library with muscle groups
-│   │                                # Exports: getDisplayName(), getShortName()
+│   │                                # Exports: getDisplayName(), getShortName(),
+│   │                                #   computeDuplicates(), NAME_MIGRATION
 │   ├── segments.ts                 # Workout grid → flat segment list
-│   ├── storage.ts                  # localStorage helpers
+│   ├── storage.ts                  # localStorage helpers (with name migration)
 │   ├── audio.ts                    # Web Audio beep/sound helpers
 │   ├── wakeLock.ts                 # Screen Wake Lock wrapper
 │   ├── utils.ts                    # Shared utilities (ID gen, etc.)
@@ -102,9 +103,13 @@ Each exercise cell is a ~50–60 px square showing:
 - **Background colour** from primary muscle group
 - **Diagonal split** (45° linear-gradient) when exercise has two muscle groups
 - **Grey** (#555) for empty/unassigned slots
-- **Duplicate dot** (8 px circle, top-right): yellow (`#f59e0b`) for same-set duplicates, red (`var(--color-danger)`) for cross-set duplicates; yellow takes priority when both apply
+- **Duplicate dot** (8 px circle, top-right): yellow (`var(--color-warning)`) for same-set duplicates, red (`var(--color-danger)`) for cross-set duplicates; yellow takes priority when both apply
 
-`getDisplayName()` strips "Kettlebell "/"KB " prefixes for list display (SlotEditor exercise list, WorkoutDetails rows). `getShortName()` further truncates to ≤10 chars for grid cells.
+`getDisplayName()` strips "Kettlebell "/"KB " prefixes for backward compatibility (display names in lists). `getShortName()` further truncates to ≤10 chars for grid cells. Since all built-in exercises now use short names (e.g. "Swing" not "Kettlebell Swing"), these functions are mainly relevant for legacy or user-created exercises.
+
+`computeDuplicates(grid)` analyses the workout grid and returns per-set and cross-set duplicate exercise names. Used by WorkoutBuilder, WorkoutDetails, and SlotEditor.
+
+`NAME_MIGRATION` maps old "Kettlebell X" names to their new short forms for localStorage migration. Used by both `exercises.ts` (library loading) and `storage.ts` (workout grid loading).
 
 Muscle group colour map (vibrant / muted):
 | Group | Colour | Vibrant | Muted |
@@ -241,7 +246,7 @@ Acquired when timer starts, released on pause/abort/completion. Re-acquired on `
 ## Persistence
 
 All workouts serialised as JSON array in `localStorage` under key `kettleclock_workouts`. Helpers:
-- `loadWorkouts(): Workout[]`
+- `loadWorkouts(): Workout[]` — also migrates old exercise names in saved grids via `NAME_MIGRATION`
 - `saveWorkout(w: Workout): void`
 - `deleteWorkout(id: string): void`
 

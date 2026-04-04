@@ -27,8 +27,8 @@ A workout is a **grid** of `S` sets × `E` exercises per set. Each cell is an ex
 
 ### Exercise Library
 
-A unified library of **kettlebell and bodyweight exercises**, combining built-in defaults with user-created entries. Each exercise has:
-- Full name
+A unified library of **kettlebell and bodyweight exercises**, combining built-in defaults with user-created entries. Exercise names are concise (e.g. "Swing", "Row", "Deadlift") — no redundant "Kettlebell" prefix. Each exercise has:
+- Name (short, descriptive)
 - **Primary muscle group** (and optional secondary)
 - **Equipment type**: `kettlebell`, `bodyweight`, or `either` (usable with or without kettlebell)
 - **Built-in flag**: whether the exercise ships with the app or was user-created
@@ -45,6 +45,8 @@ Three equipment classifications:
 | Kettlebell | 🔔 | Requires a kettlebell |
 | Bodyweight | 🤸 | No equipment needed |
 | Either | 🔔🤸 | Usable with or without a kettlebell (e.g. Sit-Up, Burpee, Lunge, Squat, Glute Bridge) |
+
+"Kettlebell Lunge" was merged into "Lunge" (equipment: `either`) — a single exercise covers both kettlebell and bodyweight lunges.
 
 Exercises tagged `either` appear under both the kettlebell and bodyweight equipment filters. The `either` option is selectable when adding or editing exercises in the library.
 
@@ -86,7 +88,7 @@ All defaults are editable per-workout.
 
 Accessible via **"Workout Details"** in the hamburger menu on the Setup page. Opens a full-screen overlay showing a vertical list of all exercises grouped by set. Each row displays:
 - A small colour-coded exercise cell (with duplicate dot indicators)
-- The exercise display name ("Kettlebell" prefix stripped for readability)
+- The exercise display name
 - Two time badges: exercise duration and rest-after time
 
 Default values appear in a muted/dimmed colour; custom overrides appear in normal colour.
@@ -118,13 +120,13 @@ The underlying data model is unchanged — `ExerciseSlot` still uses optional `d
     - Set boundary labels (S1, S2, …) above each group of cells
     - Visual dividers between sets
     - Active slot highlighted with a red border
-    - Cells show muted muscle-group colours matching the main grid
+    - Cells show muted muscle-group colours matching the main grid, including **diagonal split** for exercises with a secondary muscle group and **duplicate dot indicators** (same visual style as main grid cells)
   - **Default mode** (Fill Empty): after selecting an exercise, auto-advances to the next empty slot. When all slots are filled, the picker **stays open** (does not auto-close) so the user can continue reassigning.
   - **"Overwrite filled" toggle switch** in the **⋯ options menu**: when enabled, advances to the next slot sequentially (wraps around) regardless of whether it's filled.
   - **⋯ options menu** also contains:
     - **Equipment filter** (All / 🔔 / 🤸) — icon-only buttons
     - **Clear All** button to reset all slots to empty
-  - **Exercise list** below the strip: muscle group filter chips, scrollable list of enabled exercises sorted alphabetically, with colour dots and in-set/in-grid indicators. Exercise names strip the "Kettlebell" prefix for cleaner display (e.g. "Kettlebell Swing" → "Swing").
+  - **Exercise list** below the strip: muscle group filter chips, scrollable list of enabled exercises sorted alphabetically, with colour dots and in-set/in-grid indicators.
   - Tap any slot in the strip to jump to it directly
   - Auto-advance wraps from the last slot back to the first
 - Default timing controls (exercise, rest, set rest)
@@ -170,6 +172,7 @@ Accessible from the Setup phase via the hamburger menu. Manages the full list of
 - The full exercise library (defaults + custom, with enabled state) is stored in `localStorage` under a dedicated key
 - On first launch, the library is seeded from the built-in defaults with all exercises enabled
 - The stored library is the single source of truth at runtime
+- **Name migration**: old exercise names (e.g. "Kettlebell Swing") are automatically migrated to the new short names (e.g. "Swing") when loaded from storage. Saved workout grids are also migrated on load.
 
 ### 3. Workout Phase
 
