@@ -51,30 +51,6 @@ function resizeGrid(grid: ExerciseSlot[][], newSets: number, newPerSet: number):
   });
 }
 
-function migrateWorkout(w: any): Workout {
-  if (w.grid) {
-    return { ...w, setsCount: w.setsCount ?? w.sets ?? 5 };
-  }
-  const exercises: any[] = w.exercises ?? [];
-  const sets = w.sets ?? w.setsCount ?? 5;
-  const perSet = w.exercisesPerSet ?? exercises.length;
-  const grid = Array.from({ length: sets }, () =>
-    exercises.map((ex: any) => makeSlot(ex.name ?? ''))
-  );
-  return {
-    id: w.id,
-    name: w.name ?? '',
-    setsCount: sets,
-    exercisesPerSet: perSet,
-    defaultExerciseDuration: w.defaultExerciseDuration ?? 30,
-    defaultExerciseRest: w.defaultExerciseRest ?? 15,
-    defaultSetRest: w.defaultSetRest ?? 60,
-    grid,
-    createdAt: w.createdAt ?? Date.now(),
-    updatedAt: w.updatedAt ?? Date.now(),
-  };
-}
-
 /** Does the grid contain any assigned exercises? */
 function gridHasExercises(grid: ExerciseSlot[][]): boolean {
   return grid.some((row) => row.some((s) => !!s.exerciseName));
@@ -362,10 +338,9 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
   };
 
   const handleLoad = (w: Workout) => {
-    const loaded = migrateWorkout(w);
-    setWorkout(loaded);
-    setLastSavedId(loaded.id);
-    setLastSavedUpdatedAt(loaded.updatedAt);
+    setWorkout(w);
+    setLastSavedId(w.id);
+    setLastSavedUpdatedAt(w.updatedAt);
     setShowDetails(false);
     setEditMode(false);
     setUndoStack([]);
@@ -410,11 +385,13 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
   };
 
   const duplicateFromSaved = (w: Workout) => {
-    const dup = migrateWorkout(w);
-    dup.id = generateId();
-    dup.name = (dup.name || 'Untitled') + ' (copy)';
-    dup.createdAt = Date.now();
-    dup.updatedAt = Date.now();
+    const dup: Workout = {
+      ...w,
+      id: generateId(),
+      name: (w.name || 'Untitled') + ' (copy)',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
     setWorkout(dup);
     setLastSavedId(null);
     setLastSavedUpdatedAt(null);
