@@ -66,6 +66,7 @@
   cursor: grab;
   touch-action: none;
   animation: reorderPulse 1.5s ease-in-out infinite;
+  overflow: visible;
 }
 
 @keyframes reorderPulse {
@@ -101,18 +102,20 @@
 
 .clearBtn {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  top: -6px;
+  left: -6px;
   width: 20px;
   height: 20px;
+  min-height: 20px;
+  min-width: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(60, 60, 60, 0.9);
   color: #fff;
   font-size: 0.7rem;
   font-weight: 700;
-  border: none;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
   border-radius: 50%;
   z-index: 3;
   cursor: pointer;

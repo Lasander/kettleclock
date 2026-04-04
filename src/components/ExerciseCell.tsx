@@ -69,18 +69,18 @@ export function ExerciseCell({
           style={{ background: MUSCLE_COLORS_MUTED[def!.secondary!] }}
         />
       )}
+      {editMode && exerciseName && onClear && (
+        <button
+          className={styles.clearBtn}
+          data-clear=""
+          onClick={(e) => { e.stopPropagation(); onClear(); }}
+          aria-label="Clear exercise"
+        >×</button>
+      )}
       <span className={styles.cellText}>
         {editMode ? (
           <>
             <span className={styles.dragHandle}>⠿</span>
-            {exerciseName && onClear && (
-              <button
-                className={styles.clearBtn}
-                data-clear=""
-                onClick={(e) => { e.stopPropagation(); onClear(); }}
-                aria-label="Clear exercise"
-              >×</button>
-            )}
             <span className={styles.abbrText}>{displayName || '+'}</span>
           </>
         ) : (
