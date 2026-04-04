@@ -27,9 +27,9 @@ kettleclock/
 │   ├── types.ts                    # Shared TypeScript types
 │   ├── exercises.ts                # Exercise library with muscle groups
 │   │                                # Exports: getDisplayName(), getShortName(),
-│   │                                #   computeDuplicates(), NAME_MIGRATION
+│   │                                #   computeDuplicates()
 │   ├── segments.ts                 # Workout grid → flat segment list
-│   ├── storage.ts                  # localStorage helpers (with name migration)
+│   ├── storage.ts                  # localStorage helpers (versioned envelope)
 │   ├── audio.ts                    # Web Audio beep/sound helpers
 │   ├── wakeLock.ts                 # Screen Wake Lock wrapper
 │   ├── utils.ts                    # Shared utilities (ID gen, etc.)
@@ -40,13 +40,9 @@ kettleclock/
 │   │   ├── ExerciseCell.module.css
 │   │   ├── ExerciseLibrary.tsx     # Exercise library editor screen
 │   │   ├── ExerciseLibrary.module.css
-│   │   ├── ExercisePicker.tsx      # (unused, superseded by SlotEditor)
-│   │   ├── ExercisePicker.module.css
 │   │   ├── Logo.tsx                # App logo component
 │   │   ├── NumberControl.tsx       # Tap-to-edit number display
 │   │   ├── NumberControl.module.css
-│   │   ├── QuickFill.tsx           # (unused, superseded by SlotEditor)
-│   │   ├── QuickFill.module.css
 │   │   ├── SlotEditor.tsx          # Full-screen slot editor overlay
 │   │   ├── SlotEditor.module.css
 │   │   ├── WorkoutDetails.tsx      # Per-exercise timing overlay
@@ -108,8 +104,6 @@ Each exercise cell is a ~50–60 px square showing:
 `getDisplayName()` strips "Kettlebell "/"KB " prefixes for backward compatibility (display names in lists). `getShortName()` further truncates to ≤10 chars for grid cells. Since all built-in exercises now use short names (e.g. "Swing" not "Kettlebell Swing"), these functions are mainly relevant for legacy or user-created exercises.
 
 `computeDuplicates(grid)` analyses the workout grid and returns per-set and cross-set duplicate exercise names. Used by WorkoutBuilder, WorkoutDetails, and SlotEditor.
-
-`NAME_MIGRATION` maps old "Kettlebell X" names to their new short forms for localStorage migration. Used by both `exercises.ts` (library loading) and `storage.ts` (workout grid loading).
 
 Muscle group colour map (vibrant / muted):
 | Group | Colour | Vibrant | Muted |
@@ -208,7 +202,7 @@ When aborting, the workout object is passed back to the Builder via `initialWork
 - Timer screen goes near-fullscreen (hides builder chrome)
 - CSS `env(safe-area-inset-*)` for notched phones — each screen manages its own safe-area padding (no global body/root padding); full-screen views (WorkoutDetails, ExerciseLibrary, Summary, Timer, Swap/Clear overlay) respect `safe-area-inset-top`
 - Body uses `height: 100dvh; overflow: hidden` to prevent page-level scrolling; Timer uses `height: 100dvh; overflow: hidden`; Summary uses `height: 100dvh; overflow-y: auto`
-- **Setup screen**: uses `100dvh` for full viewport height; grid header ("Exercise Grid" label + Swap/Clear button) and muscle legend stay fixed at top; exercise grid cells scroll vertically; "Start Workout" button pinned at bottom
+- **Setup screen**: uses `100dvh` for full viewport height; **compact header** with logo (28 px) + brand text (muted, 0.75 rem) on the left, workout name input centered, hamburger menu on the right; all five number controls (Sets, Ex / Set, Exercise, Rest, Set Rest) on a **single compact row**; grid header ("Exercise Grid" label + Swap/Clear button) and muscle legend stay fixed at top; exercise grid cells scroll vertically; "Start Workout" button pinned at bottom
 - **Swap/Clear mode**: full-screen overlay with animated entry; cells show × badge (top-left corner, partly outside cell via `overflow: visible`, `z-index: 10` to prevent clipping by adjacent cells), edit overlay grid has padding to prevent edge clipping; drag to swap, undo/redo stack (up to 50 entries); both stacks cleared on exit edit mode or loading/creating workouts
 - **Number controls**: show large value by default; tap to reveal edit input; pending digit indicator uses green (`#4ade80`)
 - **Grid cells**: tap to open Slot Editor, long-press to enter Swap/Clear mode
@@ -245,9 +239,34 @@ Acquired when timer starts, released on pause/abort/completion. Re-acquired on `
 
 ## Persistence
 
-All workouts serialised as JSON array in `localStorage` under key `kettleclock_workouts`. Helpers:
-- `loadWorkouts(): Workout[]` — also migrates old exercise names in saved grids via `NAME_MIGRATION`
+All workouts serialised as JSON in `localStorage` under key `kettleclock_workouts`, wrapped in a **versioned envelope**:
+
+```typescript
+interface StoredWorkouts {
+  version: number;    // must match STORAGE_VERSION (currently 1)
+  workouts: Workout[];
+}
+```
+
+The exercise library uses the same pattern under key `kettleclock_exercises`:
+
+```typescript
+interface StoredLibrary {
+  version: number;    // must match LIBRARY_VERSION (currently 1)
+  exercises: ExerciseDefinition[];
+}
+```
+
+On load, if the stored `version` doesn't match the current constant, old data is **discarded** (no migration code). Exercise library re-seeds from built-in defaults; workouts return an empty list. This policy is temporary for development — backward compatibility will be added later.
+
+Helpers:
+- `loadWorkouts(): Workout[]`
 - `saveWorkout(w: Workout): void`
 - `deleteWorkout(id: string): void`
+
+Exercise library helpers in `exercises.ts`:
+- `loadFromStorage(): ExerciseDefinition[] | null` (internal)
+- `saveToStorage(library): void` (internal)
+- `getAllExercises()`, `addExercise()`, `updateExercise()`, `deleteExercise()`, `resetLibrary()`
 
 IDs generated via a simple `Date.now() + Math.random()` function (avoids `crypto.randomUUID()` which requires secure context on some mobile browsers).

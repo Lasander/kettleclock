@@ -101,9 +101,9 @@ The underlying data model is unchanged — `ExerciseSlot` still uses optional `d
 
 ### 1. Setup Phase
 
-- Name the workout
+- **Compact header**: logo (28 px) + brand text (muted, 0.75 rem) on the left, workout name input centered, hamburger menu on the right — all in a single row
 - Set **number of sets** and **exercises per set** (sizes the grid)
-- **Number controls**: show a large readable number; tap to edit
+- **Number controls**: all five controls (Sets, Ex / Set, Exercise, Rest, Set Rest) on a **single compact row** below the header; tap any value to edit
 - **Setup screen layout**: uses full viewport height (`100dvh`). The grid header ("Exercise Grid" label + Swap/Clear button) and muscle legend stay fixed at top; only the exercise grid cells scroll vertically. The "Start Workout" button is always visible at the bottom and shows the **calculated total workout time** (e.g. "Start Workout · 25m 30s"), computed from `buildSegments`.
 - **Visual exercise grid** (coloured rectangles):
   - Tap any cell → opens the **Slot Editor** (full-screen overlay for assigning exercises)
@@ -169,10 +169,10 @@ Accessible from the Setup phase via the hamburger menu. Manages the full list of
 - Deletion requires confirmation
 
 #### Persistence
-- The full exercise library (defaults + custom, with enabled state) is stored in `localStorage` under a dedicated key
+- The full exercise library (defaults + custom, with enabled state) is stored in `localStorage` under a dedicated key, wrapped in a **versioned envelope** (`{ version, exercises }`)
 - On first launch, the library is seeded from the built-in defaults with all exercises enabled
 - The stored library is the single source of truth at runtime
-- **Name migration**: old exercise names (e.g. "Kettlebell Swing") are automatically migrated to the new short names (e.g. "Swing") when loaded from storage. Saved workout grids are also migrated on load.
+- **Versioned storage**: both the exercise library and workout list use versioned envelopes. On load, if the stored version doesn't match the current code version, old data is discarded and re-seeded from defaults (no migration code). Version constants: `LIBRARY_VERSION` (exercises), `STORAGE_VERSION` (workouts).
 
 ### 3. Workout Phase
 
