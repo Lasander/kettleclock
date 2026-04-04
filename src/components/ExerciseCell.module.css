@@ -55,7 +55,7 @@
   right: 2px;
   width: 8px;
   height: 8px;
-  background: #f59e0b;
+  background: var(--color-warning);
   border-radius: 50%;
   z-index: 2;
 }

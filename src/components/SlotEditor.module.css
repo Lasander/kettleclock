@@ -362,7 +362,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #f59e0b;
+  background: var(--color-warning);
   flex-shrink: 0;
   opacity: 0.85;
   margin-left: 4px;
