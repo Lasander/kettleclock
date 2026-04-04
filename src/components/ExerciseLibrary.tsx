@@ -3,6 +3,7 @@ import type { ExerciseDefinition, MuscleGroup, Equipment } from '../types';
 import { MUSCLE_COLORS, MUSCLE_LABELS, MUSCLE_ORDER } from '../types';
 import {
   getExerciseLibrary,
+  getShortName,
   saveExercise,
   updateExercise,
   deleteExercise,
@@ -64,7 +65,7 @@ export function ExerciseLibrary({ onBack }: Props) {
       if (equipmentFilter.size > 0 && !equipmentFilter.has(ex.equipment) && ex.equipment !== 'either') return false;
       if (muscleFilter.size > 0 && !muscleFilter.has(ex.primary) && !(ex.secondary && muscleFilter.has(ex.secondary))) return false;
       return true;
-    });
+    }).sort((a, b) => getShortName(a.name).localeCompare(getShortName(b.name)));
   }, [library, equipmentFilter, muscleFilter]);
 
   const toggleEquipment = (eq: Equipment) => {
@@ -180,11 +181,11 @@ export function ExerciseLibrary({ onBack }: Props) {
         <button
           className={`${styles.filterBtn}${equipmentFilter.has('kettlebell') ? ` ${styles.filterBtnActive}` : ''}`}
           onClick={() => toggleEquipment('kettlebell')}
-        >🔔 Kettlebell</button>
+        >🔔</button>
         <button
           className={`${styles.filterBtn}${equipmentFilter.has('bodyweight') ? ` ${styles.filterBtnActive}` : ''}`}
           onClick={() => toggleEquipment('bodyweight')}
-        >🤸 Bodyweight</button>
+        >🤸</button>
       </div>
 
       <div className={styles.muscleRow}>

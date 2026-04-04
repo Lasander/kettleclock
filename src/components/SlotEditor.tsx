@@ -143,7 +143,7 @@ export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, on
       if (equipmentFilter.size > 0 && !equipmentFilter.has(ex.equipment) && ex.equipment !== 'either') return false;
       if (muscleFilter.size > 0 && !muscleFilter.has(ex.primary) && !(ex.secondary && muscleFilter.has(ex.secondary))) return false;
       return true;
-    });
+    }).sort((a, b) => getShortName(a.name).localeCompare(getShortName(b.name)));
   }, [enabledExercises, equipmentFilter, muscleFilter]);
 
   // Handle exercise selection
@@ -257,12 +257,15 @@ export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, on
               {menuOpen && (
                 <div className={styles.pickerMenu}>
                   <label className={styles.pickerMenuItem}>
-                    <input
-                      type="checkbox"
-                      checked={overwriteMode}
-                      onChange={(e) => setOverwriteMode(e.target.checked)}
-                    />
                     <span>Overwrite filled</span>
+                    <span className={styles.toggle}>
+                      <input
+                        type="checkbox"
+                        checked={overwriteMode}
+                        onChange={(e) => setOverwriteMode(e.target.checked)}
+                      />
+                      <span className={styles.toggleSlider} />
+                    </span>
                   </label>
                   <div className={styles.pickerMenuSep} />
                   <div className={styles.pickerMenuLabel}>Equipment</div>
@@ -274,11 +277,11 @@ export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, on
                     <button
                       className={`${styles.filterBtn}${equipmentFilter.has('kettlebell') ? ` ${styles.filterBtnActive}` : ''}`}
                       onClick={() => toggleEquipment('kettlebell')}
-                    >🔔 Kettlebell</button>
+                    >🔔</button>
                     <button
                       className={`${styles.filterBtn}${equipmentFilter.has('bodyweight') ? ` ${styles.filterBtnActive}` : ''}`}
                       onClick={() => toggleEquipment('bodyweight')}
-                    >🤸 Bodyweight</button>
+                    >🤸</button>
                   </div>
                   <div className={styles.pickerMenuSep} />
                   <button className={styles.pickerMenuDanger} onClick={() => { handleClearAll(); setMenuOpen(false); }}>
