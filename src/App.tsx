@@ -9,14 +9,18 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('setup');
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [exerciseElapsed, setExerciseElapsed] = useState(0);
+  const [restElapsed, setRestElapsed] = useState(0);
 
   const handleStart = (w: Workout) => {
     setWorkout(w);
     setScreen('workout');
   };
 
-  const handleDone = (elapsedSec: number) => {
+  const handleDone = (elapsedSec: number, exerciseSec: number, restSec: number) => {
     setElapsed(elapsedSec);
+    setExerciseElapsed(exerciseSec);
+    setRestElapsed(restSec);
     setScreen('summary');
   };
 
@@ -42,7 +46,7 @@ export default function App() {
 
   if (screen === 'summary' && workout) {
     return (
-      <Summary workout={workout} elapsed={elapsed} onAgain={handleAgain} onBack={handleBack} />
+      <Summary workout={workout} elapsed={elapsed} exerciseElapsed={exerciseElapsed} restElapsed={restElapsed} onAgain={handleAgain} onBack={handleBack} />
     );
   }
 

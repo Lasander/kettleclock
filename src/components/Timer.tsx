@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Workout, Segment } from '../types';
 import { buildSegments } from '../segments';
-import { resumeAudio, playCountdownBeep, playExerciseStart, playHalfTime, playExerciseEnding, playSetRest } from '../audio';
+import { resumeAudio, ensureAudioActive, playCountdownBeep, playExerciseStart, playHalfTime, playExerciseEnding, playSetRest } from '../audio';
 import { requestWakeLock, releaseWakeLock, reacquireOnVisibilityChange } from '../wakeLock';
 import { getShortName } from '../exercises';
 import styles from './Timer.module.css';
 
 interface Props {
   workout: Workout;
-  onDone: (elapsed: number) => void;
+  onDone: (elapsed: number, exerciseElapsed: number, restElapsed: number) => void;
   onAbort: () => void;
 }
 
@@ -27,14 +27,18 @@ export function Timer({ workout, onDone, onAbort }: Props) {
   const startTimeRef = useRef(Date.now());
   const intervalRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const playedBeepsRef = useRef<Set<string>>(new Set());
+  const exerciseElapsedRef = useRef(0);
+  const restElapsedRef = useRef(0);
+  const segTypeRef = useRef('');
 
   const seg = segments[segIndex];
+  segTypeRef.current = seg?.type ?? '';
 
   const advance = useCallback(() => {
     const next = segIndex + 1;
     if (next >= segments.length) {
       const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000);
-      onDone(elapsed);
+      onDone(elapsed, exerciseElapsedRef.current, restElapsedRef.current);
       return;
     }
     setSegIndex(next);
@@ -64,6 +68,11 @@ export function Timer({ workout, onDone, onAbort }: Props) {
   useEffect(() => {
     if (paused) return;
     intervalRef.current = setInterval(() => {
+      if (segTypeRef.current === 'exercise') {
+        exerciseElapsedRef.current += 1;
+      } else {
+        restElapsedRef.current += 1;
+      }
       setRemaining((r) => {
         if (r <= 1) {
           advance();
@@ -109,9 +118,14 @@ export function Timer({ workout, onDone, onAbort }: Props) {
     resumeAudio();
     requestWakeLock();
     const cleanup = reacquireOnVisibilityChange(true);
+    const audioInterval = setInterval(() => ensureAudioActive(), 10000);
+    const handleVisibility = () => { if (!document.hidden) ensureAudioActive(); };
+    document.addEventListener('visibilitychange', handleVisibility);
     return () => {
       releaseWakeLock();
       cleanup();
+      clearInterval(audioInterval);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, []);
 
@@ -203,7 +217,7 @@ export function Timer({ workout, onDone, onAbort }: Props) {
         )}
       </div>
       <div className={styles.controls}>
-        <button className={`${styles.pauseBtn}${paused ? ` ${styles.pauseBtnResume}` : ''}`} onClick={() => setPaused((p) => !p)}>
+        <button className={`${styles.pauseBtn}${paused ? ` ${styles.pauseBtnResume}` : ''}`} onClick={() => { resumeAudio(); setPaused((p) => !p); }}>
           {paused ? '▶ Resume' : '⏸ Pause'}
         </button>
         <div className={styles.navRow}>

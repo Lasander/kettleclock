@@ -82,3 +82,11 @@ export function playSetRest(): void {
   playTone(440, 300, 0.35);
 }
 
+/** Re-resume AudioContext if iOS suspended it. Call periodically during workouts. */
+export function ensureAudioActive(): void {
+  const ctx = getCtx();
+  if (ctx && ctx.state === 'suspended') {
+    ctx.resume().catch(() => {});
+  }
+}
+
