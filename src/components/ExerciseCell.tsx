@@ -20,9 +20,6 @@ function getCellStyle(exerciseName: string): React.CSSProperties {
   const def = getExerciseDef(exerciseName);
   if (!def) return { background: '#555' };
   const c1 = MUSCLE_COLORS_MUTED[def.primary];
-  if (def.secondary) {
-    return { background: c1, overflow: 'hidden' as const };
-  }
   return { background: c1 };
 }
 
