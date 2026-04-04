@@ -114,7 +114,8 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
   const dragTargetRef = useRef<{ s: number; e: number } | null>(null);
   const [dragSource, setDragSource] = useState<{ s: number; e: number } | null>(null);
   const [dragTarget, setDragTarget] = useState<{ s: number; e: number } | null>(null);
-  const [undoSnapshot, setUndoSnapshot] = useState<ExerciseSlot[][] | null>(null);
+  const [undoStack, setUndoStack] = useState<ExerciseSlot[][][]>([]);
+  const [redoStack, setRedoStack] = useState<ExerciseSlot[][][]>([]);
 
   // Long-press to enter edit mode
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -241,7 +242,9 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
 
   // ── Edit mode grid drag ──────────────────────────────────────────────
   const saveUndo = useCallback(() => {
-    setUndoSnapshot(workout.grid.map(row => row.map(slot => ({ ...slot }))));
+    const snapshot = workout.grid.map(row => row.map(slot => ({ ...slot })));
+    setUndoStack(prev => [...prev.slice(-49), snapshot]);
+    setRedoStack([]);
   }, [workout.grid]);
 
   const clearCell = useCallback((s: number, e: number) => {
@@ -254,10 +257,22 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
   }, [saveUndo, updateWorkout]);
 
   const handleUndo = useCallback(() => {
-    if (!undoSnapshot) return;
-    updateWorkout((w) => ({ ...w, grid: undoSnapshot }));
-    setUndoSnapshot(null);
-  }, [undoSnapshot, updateWorkout]);
+    if (undoStack.length === 0) return;
+    const current = workout.grid.map(row => row.map(slot => ({ ...slot })));
+    const prev = undoStack[undoStack.length - 1];
+    setUndoStack(s => s.slice(0, -1));
+    setRedoStack(s => [...s, current]);
+    updateWorkout(w => ({ ...w, grid: prev }));
+  }, [undoStack, workout.grid, updateWorkout]);
+
+  const handleRedo = useCallback(() => {
+    if (redoStack.length === 0) return;
+    const current = workout.grid.map(row => row.map(slot => ({ ...slot })));
+    const next = redoStack[redoStack.length - 1];
+    setRedoStack(s => s.slice(0, -1));
+    setUndoStack(s => [...s, current]);
+    updateWorkout(w => ({ ...w, grid: next }));
+  }, [redoStack, workout.grid, updateWorkout]);
 
   const swapCells = useCallback((src: { s: number; e: number }, dst: { s: number; e: number }) => {
     saveUndo();
@@ -360,7 +375,8 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
     setLastSavedUpdatedAt(loaded.updatedAt);
     setShowDetails(false);
     setEditMode(false);
-    setUndoSnapshot(null);
+    setUndoStack([]);
+    setRedoStack([]);
   };
 
   const handleDelete = (id: string) => {
@@ -395,7 +411,8 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
     setLastSavedUpdatedAt(null);
     setShowDetails(false);
     setEditMode(false);
-    setUndoSnapshot(null);
+    setUndoStack([]);
+    setRedoStack([]);
     setNewFlowStep(null);
   };
 
@@ -410,7 +427,8 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
     setLastSavedUpdatedAt(null);
     setShowDetails(false);
     setEditMode(false);
-    setUndoSnapshot(null);
+    setUndoStack([]);
+    setRedoStack([]);
     setNewFlowStep(null);
   };
 
@@ -594,14 +612,19 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
           <div className={styles.editOverlayHeader}>
             <span className={styles.editOverlayTitle}>Swap / Clear</span>
             <div className={styles.editOverlayActions}>
-              {undoSnapshot && (
+              {undoStack.length > 0 && (
                 <button className={styles.undoBtn} onClick={handleUndo}>
                   ↩ Undo
                 </button>
               )}
+              {redoStack.length > 0 && (
+                <button className={styles.undoBtn} onClick={handleRedo}>
+                  ↪ Redo
+                </button>
+              )}
               <button
                 className={`${styles.reorderBtn} ${styles.reorderBtnActive}`}
-                onClick={() => { setEditMode(false); setUndoSnapshot(null); }}
+                onClick={() => { setEditMode(false); setUndoStack([]); setRedoStack([]); }}
               >
                 ✓ Done
               </button>
