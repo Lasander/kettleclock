@@ -5,6 +5,7 @@ import { loadWorkouts, saveWorkout, deleteWorkout } from '../storage';
 import { buildSegments } from '../segments';
 import { generateId } from '../utils';
 import { resumeAudio } from '../audio';
+import { computeDuplicates } from '../exercises';
 import { Logo } from './Logo';
 import { ExerciseCell } from './ExerciseCell';
 import { NumberControl } from './NumberControl';
@@ -163,23 +164,10 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
 
   const refreshSaved = () => setSaved(loadWorkouts());
 
-  const { setDupes, workoutDupes } = useMemo(() => {
-    const setDupes = new Map<string, Set<string>>();
-    const workoutCounts: Record<string, number> = {};
-    for (let s = 0; s < workout.grid.length; s++) {
-      const counts: Record<string, number> = {};
-      for (const slot of workout.grid[s]) {
-        if (slot.exerciseName) {
-          counts[slot.exerciseName] = (counts[slot.exerciseName] || 0) + 1;
-          workoutCounts[slot.exerciseName] = (workoutCounts[slot.exerciseName] || 0) + 1;
-        }
-      }
-      const dupes = new Set(Object.entries(counts).filter(([, c]) => c > 1).map(([n]) => n));
-      setDupes.set(String(s), dupes);
-    }
-    const workoutDupes = new Set(Object.entries(workoutCounts).filter(([, c]) => c > 1).map(([n]) => n));
-    return { setDupes, workoutDupes };
-  }, [workout.grid]);
+  const { setDupes, workoutDupes } = useMemo(
+    () => computeDuplicates(workout.grid),
+    [workout.grid]
+  );
 
   // Detect whether current workout has unsaved changes
   const hasUnsavedChanges = useMemo(() => {

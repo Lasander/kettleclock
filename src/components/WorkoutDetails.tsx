@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import type { Workout } from '../types';
-import { getDisplayName } from '../exercises';
+import { getDisplayName, computeDuplicates } from '../exercises';
 import { ExerciseCell } from './ExerciseCell';
 import { NumberControl } from './NumberControl';
 import styles from './WorkoutDetails.module.css';
@@ -14,21 +14,10 @@ interface WorkoutDetailsProps {
 export function WorkoutDetails({ workout, onOverride, onClose }: WorkoutDetailsProps) {
   const [editing, setEditing] = useState<{ setIdx: number; exIdx: number } | null>(null);
 
-  const { setDupes, workoutDupes } = useMemo(() => {
-    const setDupes = new Map<string, Set<string>>();
-    const workoutCounts: Record<string, number> = {};
-    for (let s = 0; s < workout.grid.length; s++) {
-      const counts: Record<string, number> = {};
-      for (const slot of workout.grid[s]) {
-        if (slot.exerciseName) {
-          counts[slot.exerciseName] = (counts[slot.exerciseName] || 0) + 1;
-          workoutCounts[slot.exerciseName] = (workoutCounts[slot.exerciseName] || 0) + 1;
-        }
-      }
-      setDupes.set(String(s), new Set(Object.entries(counts).filter(([, c]) => c > 1).map(([n]) => n)));
-    }
-    return { setDupes, workoutDupes: new Set(Object.entries(workoutCounts).filter(([, c]) => c > 1).map(([n]) => n)) };
-  }, [workout.grid]);
+  const { setDupes, workoutDupes } = useMemo(
+    () => computeDuplicates(workout.grid),
+    [workout.grid]
+  );
 
   if (editing !== null) {
     const slot = workout.grid[editing.setIdx][editing.exIdx];

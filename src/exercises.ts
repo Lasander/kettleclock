@@ -255,5 +255,26 @@ export function getShortName(name: string): string {
   return words[0].slice(0, 10);
 }
 
+/** Compute per-set and cross-set duplicate exercise names */
+export function computeDuplicates(grid: { exerciseName: string }[][]): {
+  setDupes: Map<string, Set<string>>;
+  workoutDupes: Set<string>;
+} {
+  const setDupes = new Map<string, Set<string>>();
+  const workoutCounts: Record<string, number> = {};
+  for (let s = 0; s < grid.length; s++) {
+    const counts: Record<string, number> = {};
+    for (const slot of grid[s]) {
+      if (slot.exerciseName) {
+        counts[slot.exerciseName] = (counts[slot.exerciseName] || 0) + 1;
+        workoutCounts[slot.exerciseName] = (workoutCounts[slot.exerciseName] || 0) + 1;
+      }
+    }
+    setDupes.set(String(s), new Set(Object.entries(counts).filter(([, c]) => c > 1).map(([n]) => n)));
+  }
+  const workoutDupes = new Set(Object.entries(workoutCounts).filter(([, c]) => c > 1).map(([n]) => n));
+  return { setDupes, workoutDupes };
+}
+
 
 

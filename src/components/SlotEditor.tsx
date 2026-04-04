@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import type { ExerciseSlot, MuscleGroup, Equipment } from '../types';
 import { MUSCLE_COLORS, MUSCLE_COLORS_MUTED, MUSCLE_LABELS, MUSCLE_ORDER } from '../types';
-import { getEnabledExercises, getExerciseDef, getDisplayName, getShortName } from '../exercises';
+import { getEnabledExercises, getExerciseDef, getDisplayName, getShortName, computeDuplicates } from '../exercises';
 import styles from './SlotEditor.module.css';
 
 interface SlotEditorProps {
@@ -34,6 +34,10 @@ export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, on
   }, [grid]);
 
   const enabledExercises = useMemo(() => getEnabledExercises(), []);
+
+  const { setDupes, workoutDupes } = useMemo(() => {
+    return computeDuplicates(localNames.map(row => row.map(name => ({ exerciseName: name }))));
+  }, [localNames]);
 
   // Flatten grid for linear indexing
   const flatSlots = useMemo(() => {
@@ -221,14 +225,6 @@ export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, on
     setLocalNames(grid.map((row) => row.map(() => '')));
   }, [grid, onUpdateSlot]);
 
-  // Get cell style for strip
-  const getCellStyle = (name: string): React.CSSProperties => {
-    if (!name) return {};
-    const def = getExerciseDef(name);
-    if (!def) return { background: '#555' };
-    return { background: MUSCLE_COLORS_MUTED[def.primary] };
-  };
-
   // Build set groups for the strip
   const setGroups = useMemo(() => {
     let flatIdx = 0;
@@ -306,20 +302,35 @@ export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, on
                     {group.cells.map(({ s, e, flatIdx: fi }) => {
                       const name = localNames[s]?.[e] ?? '';
                       const isActive = s === activeSetIdx && e === activeExIdx;
+                      const def = name ? getExerciseDef(name) : undefined;
+                      const hasSplit = !!(def?.secondary);
+                      const dupeType = name
+                        ? (setDupes.get(String(s))?.has(name) ? 'set'
+                          : workoutDupes.has(name) ? 'workout'
+                          : undefined)
+                        : undefined;
                       const cellClass = [
                         styles.slotCell,
                         isActive && styles.slotCellActive,
                         !name && styles.slotCellEmpty,
+                        dupeType === 'set' && styles.slotDupeSet,
+                        dupeType === 'workout' && styles.slotDupeWorkout,
                       ].filter(Boolean).join(' ');
                       return (
                         <div
                           key={fi}
                           className={cellClass}
-                          style={getCellStyle(name)}
+                          style={name && def ? { background: MUSCLE_COLORS_MUTED[def.primary] } : undefined}
                           data-slot-idx={fi}
                           onClick={() => handleSlotTap(s, e, fi)}
                         >
-                          {name ? getShortName(name) : '+'}
+                          {hasSplit && (
+                            <div
+                              className={styles.slotSplitOverlay}
+                              style={{ background: MUSCLE_COLORS_MUTED[def!.secondary!] }}
+                            />
+                          )}
+                          <span className={styles.slotCellText}>{name ? getShortName(name) : '+'}</span>
                         </div>
                       );
                     })}

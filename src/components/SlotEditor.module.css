@@ -192,6 +192,7 @@
   cursor: pointer;
   user-select: none;
   flex-shrink: 0;
+  position: relative;
   border: 2.5px solid transparent;
   transition: border-color 0.15s, box-shadow 0.15s;
   text-align: center;
@@ -213,6 +214,41 @@
   color: #999;
   font-size: 1rem;
   font-weight: 400;
+}
+
+.slotSplitOverlay {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(100% 0%, 100% 100%, 0% 100%);
+}
+
+.slotCellText {
+  position: relative;
+  z-index: 1;
+}
+
+.slotDupeSet::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background: var(--color-warning);
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.slotDupeWorkout::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background: var(--color-danger);
+  border-radius: 50%;
+  z-index: 2;
 }
 
 .filterBtn {
