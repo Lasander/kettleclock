@@ -65,85 +65,40 @@ const DEFAULT_EXERCISES: Omit<ExerciseDefinition, 'builtin' | 'enabled'>[] = [
   { name: 'Superman',                       primary: 'back',      secondary: 'core',      equipment: 'bodyweight' },
 ];
 
-/** Maps old exercise names → new names for localStorage migration */
-export const NAME_MIGRATION: Record<string, string> = {
-  'Kettlebell Swing': 'Swing',
-  'Kettlebell Row': 'Row',
-  'Kettlebell Deadlift': 'Deadlift',
-  'Kettlebell Halo': 'Halo',
-  'Kettlebell Windmill': 'Windmill',
-  'Kettlebell Thruster': 'Thruster',
-  'Kettlebell Lunge': 'Lunge',  // merged with bodyweight Lunge
-  'Kettlebell Clean': 'Clean',
-  'Kettlebell Press': 'Press',
-  'Kettlebell High Pull': 'High Pull',
-  'Kettlebell Sumo Squat': 'Sumo Squat',
-  'Kettlebell Front Squat': 'Front Squat',
-  'Kettlebell Farmer Walk': 'Farmer Walk',
-  'Kettlebell Renegade Row': 'Renegade Row',
-  'Kettlebell Around the World': 'Around the World',
-  'Kettlebell Single-Leg Deadlift': 'Single-Leg Deadlift',
-  'Kettlebell Floor Press': 'Floor Press',
-  'Kettlebell Crush Curl': 'Crush Curl',
-  'Kettlebell Bent Press': 'Bent Press',
-  'Kettlebell Overhead Carry': 'Overhead Carry',
-  'Kettlebell Bob & Weave': 'Bob & Weave',
-  'Kettlebell Side Lunge': 'Side Lunge',
-  'Kettlebell Push Press': 'Push Press',
-};
-
 // ── localStorage persistence ───────────────────────────────────────────
 
+const LIBRARY_VERSION = 1;
 const LIBRARY_KEY = 'kettleclock_exercises';
+
+interface StoredLibrary {
+  version: number;
+  exercises: ExerciseDefinition[];
+}
 
 function seedDefaults(): ExerciseDefinition[] {
   return DEFAULT_EXERCISES.map((e) => ({ ...e, builtin: true, enabled: true }));
-}
-
-/** Migrate old exercises that don't have equipment/builtin/enabled fields */
-function migrateExercise(e: any): ExerciseDefinition {
-  const migratedName = NAME_MIGRATION[e.name] ?? e.name;
-  const defaultMatch = DEFAULT_EXERCISES.find((d) => d.name === migratedName)
-    ?? DEFAULT_EXERCISES.find((d) => d.name === e.name);
-  return {
-    name: migratedName,
-    primary: e.primary,
-    secondary: e.secondary,
-    equipment: (e.equipment === 'kettlebell' || e.equipment === 'bodyweight' || e.equipment === 'either')
-      ? e.equipment
-      : defaultMatch?.equipment ?? (
-          NAME_MIGRATION[e.name] !== undefined ||
-          e.name.startsWith('Kettlebell ') ||
-          ['Goblet Squat', 'Turkish Get-Up', 'Clean & Press', 'Snatch', 'Figure 8'].includes(e.name)
-            ? 'kettlebell' : 'bodyweight'
-        ),
-    builtin: e.builtin ?? !!defaultMatch,
-    enabled: e.enabled ?? true,
-  };
 }
 
 function loadFromStorage(): ExerciseDefinition[] | null {
   try {
     const raw = localStorage.getItem(LIBRARY_KEY);
     if (!raw) return null;
-    const arr = JSON.parse(raw);
-    if (!Array.isArray(arr)) return null;
-    const migrated = arr.map(migrateExercise);
-    // Deduplicate by name (migration may create duplicates)
-    const seen = new Set<string>();
-    const deduped = migrated.filter((e) => {
-      if (seen.has(e.name)) return false;
-      seen.add(e.name);
-      return true;
-    });
-    return deduped;
+    const data = JSON.parse(raw);
+    if (data && data.version === LIBRARY_VERSION && Array.isArray(data.exercises)) {
+      return data.exercises;
+    }
+    // Old or incompatible format — discard
+    localStorage.removeItem(LIBRARY_KEY);
+    return null;
   } catch {
+    localStorage.removeItem(LIBRARY_KEY);
     return null;
   }
 }
 
 function saveToStorage(library: ExerciseDefinition[]): void {
-  localStorage.setItem(LIBRARY_KEY, JSON.stringify(library));
+  const data: StoredLibrary = { version: LIBRARY_VERSION, exercises: library };
+  localStorage.setItem(LIBRARY_KEY, JSON.stringify(data));
 }
 
 // ── Runtime library (mutable singleton) ────────────────────────────────

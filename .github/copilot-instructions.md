@@ -46,3 +46,7 @@ npx vitest       # Unit tests (when configured)
 - Grid model: `ExerciseSlot[][]` — `grid[setIndex][exerciseIndex]`
 - Muscle group colours follow a spectral order (see `MUSCLE_ORDER` in types.ts)
 - Mobile-first: design for ≥ 320 px, test on iOS Safari
+
+## localStorage
+
+- **No backward compatibility** — localStorage data is versioned. If the format changes, bump the version constant and old data is discarded on load (re-seeded from defaults). Do not write migration code. This policy is temporary for development; backward compatibility will be added later.

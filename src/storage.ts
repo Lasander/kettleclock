@@ -1,31 +1,26 @@
 import type { Workout } from './types';
-import { NAME_MIGRATION } from './exercises';
 
 const STORAGE_KEY = 'kettleclock_workouts';
+const STORAGE_VERSION = 1;
+
+interface StoredWorkouts {
+  version: number;
+  workouts: Workout[];
+}
 
 export function loadWorkouts(): Workout[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    const workouts: Workout[] = JSON.parse(raw);
-    let changed = false;
-    for (const w of workouts) {
-      if (!w.grid) continue;
-      for (const row of w.grid) {
-        for (const slot of row) {
-          const newName = NAME_MIGRATION[slot.exerciseName];
-          if (newName) {
-            slot.exerciseName = newName;
-            changed = true;
-          }
-        }
-      }
+    const data = JSON.parse(raw);
+    if (data && data.version === STORAGE_VERSION && Array.isArray(data.workouts)) {
+      return data.workouts;
     }
-    if (changed) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
-    }
-    return workouts;
+    // Old or incompatible format — discard
+    localStorage.removeItem(STORAGE_KEY);
+    return [];
   } catch {
+    localStorage.removeItem(STORAGE_KEY);
     return [];
   }
 }
@@ -38,10 +33,12 @@ export function saveWorkout(workout: Workout): void {
   } else {
     workouts.push(workout);
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
+  const data: StoredWorkouts = { version: STORAGE_VERSION, workouts };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
 export function deleteWorkout(id: string): void {
   const workouts = loadWorkouts().filter((w) => w.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
+  const data: StoredWorkouts = { version: STORAGE_VERSION, workouts };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }

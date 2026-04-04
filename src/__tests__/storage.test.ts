@@ -35,10 +35,18 @@ describe('storage', () => {
 
     it('returns stored workouts', () => {
       const w = makeWorkout();
-      localStorage.setItem('kettleclock_workouts', JSON.stringify([w]));
+      localStorage.setItem('kettleclock_workouts', JSON.stringify({ version: 1, workouts: [w] }));
       const loaded = loadWorkouts();
       expect(loaded).toHaveLength(1);
       expect(loaded[0].id).toBe('w-1');
+    });
+
+    it('discards old format (plain array) and returns empty', () => {
+      const w = makeWorkout();
+      localStorage.setItem('kettleclock_workouts', JSON.stringify([w]));
+      expect(loadWorkouts()).toEqual([]);
+      // localStorage should also be cleaned up
+      expect(localStorage.getItem('kettleclock_workouts')).toBeNull();
     });
   });
 
