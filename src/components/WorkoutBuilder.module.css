@@ -568,3 +568,7 @@
   -webkit-overflow-scrolling: touch;
   padding: 8px;
 }
+
+.editOverlayGrid .grid {
+  overflow: visible;
+}

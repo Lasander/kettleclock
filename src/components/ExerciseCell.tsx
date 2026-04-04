@@ -76,14 +76,7 @@ export function ExerciseCell({
         >×</button>
       )}
       <span className={styles.cellText}>
-        {editMode ? (
-          <>
-            <span className={styles.dragHandle}>⠿</span>
-            <span className={styles.abbrText}>{displayName || '+'}</span>
-          </>
-        ) : (
-          exerciseName ? displayName : '+'
-        )}
+        {exerciseName ? displayName : '+'}
       </span>
     </div>
   );

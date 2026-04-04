@@ -34,6 +34,7 @@
   position: absolute;
   inset: 0;
   clip-path: polygon(100% 0%, 100% 100%, 0% 100%);
+  z-index: 0;
 }
 
 .cellText {
@@ -101,16 +102,6 @@
   transform: scale(1.08);
 }
 
-.dragHandle {
-  position: absolute;
-  top: 2px;
-  left: 3px;
-  font-size: 0.65rem;
-  opacity: 0.7;
-  line-height: 1;
-  z-index: 2;
-}
-
 .clearBtn {
   position: absolute;
   top: -6px;
@@ -134,9 +125,4 @@
   line-height: 1;
 }
 
-.abbrText {
-  font-size: 0.6rem;
-  font-weight: 700;
-  text-align: center;
-  line-height: 1.15;
-}
+
