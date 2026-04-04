@@ -489,8 +489,24 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
     <div className={styles.container}>
       {/* Header with logo + hamburger */}
       <div className={styles.header}>
-        <Logo size={48} />
-        <h1 className={styles.title}>KettleClock</h1>
+        <div className={styles.headerLeft}>
+          <Logo size={28} />
+          <span className={styles.brand}>KettleClock</span>
+        </div>
+        <input
+          className={styles.nameInput}
+          type="text"
+          name="workout-name-xkcd"
+          autoComplete="one-time-code"
+          autoCorrect="off"
+          autoCapitalize="sentences"
+          spellCheck={false}
+          enterKeyHint="done"
+          value={workout.name}
+          onChange={(e) => updateWorkout((w) => ({ ...w, name: e.target.value }))}
+          onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+          placeholder="Workout name"
+        />
         <div className={styles.menuWrapper} ref={menuRef}>
           <button
             className={styles.hamburger}
@@ -524,34 +540,12 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
         </div>
       </div>
 
-      {/* Workout name */}
-      <div className={styles.nameSection}>
-        <input
-          className={styles.nameInput}
-          type="text"
-          name="workout-name-xkcd"
-          autoComplete="one-time-code"
-          autoCorrect="off"
-          autoCapitalize="sentences"
-          spellCheck={false}
-          enterKeyHint="done"
-          value={workout.name}
-          onChange={(e) => updateWorkout((w) => ({ ...w, name: e.target.value }))}
-          onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
-          placeholder="Workout name"
-        />
-      </div>
-
-      <div className={styles.controlsGroup}>
-        <div className={styles.controlsRow}>
-          <NumberControl label="Sets" value={workout.setsCount} min={1} max={20} onChange={handleSetsChange} />
-          <NumberControl label="Ex / Set" value={workout.exercisesPerSet} min={1} max={12} onChange={handleExercisesPerSetChange} />
-        </div>
-        <div className={styles.controlsRow}>
-          <NumberControl label="Exercise" value={workout.defaultExerciseDuration} min={1} max={999} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultExerciseDuration: v }))} />
-          <NumberControl label="Rest" value={workout.defaultExerciseRest} min={0} max={999} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultExerciseRest: v }))} />
-          <NumberControl label="Set Rest" value={workout.defaultSetRest} min={0} max={999} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultSetRest: v }))} />
-        </div>
+      <div className={styles.controlsRow}>
+        <NumberControl label="Sets" value={workout.setsCount} min={1} max={20} onChange={handleSetsChange} />
+        <NumberControl label="Ex / Set" value={workout.exercisesPerSet} min={1} max={12} onChange={handleExercisesPerSetChange} />
+        <NumberControl label="Exercise" value={workout.defaultExerciseDuration} min={1} max={999} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultExerciseDuration: v }))} />
+        <NumberControl label="Rest" value={workout.defaultExerciseRest} min={0} max={999} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultExerciseRest: v }))} />
+        <NumberControl label="Set Rest" value={workout.defaultSetRest} min={0} max={999} suffix="s" onChange={(v) => updateWorkout((w) => ({ ...w, defaultSetRest: v }))} />
       </div>
 
       <div className={styles.gridSection}>
