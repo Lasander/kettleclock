@@ -200,6 +200,11 @@ export function isNameTaken(name: string, excludeName?: string): boolean {
   return _library.some((e) => e.name.toLowerCase() === lower && e.name !== excludeName);
 }
 
+/** Strip redundant prefix (e.g. "Kettlebell ") for display in lists */
+export function getDisplayName(name: string): string {
+  return name.replace(/^Kettlebell\s+/, '').replace(/^KB\s+/, '');
+}
+
 /** Derive a short display name (≤10 chars) for grid cells */
 export function getShortName(name: string): string {
   let short = name

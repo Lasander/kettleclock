@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import type { ExerciseSlot, MuscleGroup, Equipment } from '../types';
 import { MUSCLE_COLORS, MUSCLE_COLORS_MUTED, MUSCLE_LABELS, MUSCLE_ORDER } from '../types';
-import { getEnabledExercises, getExerciseDef, getShortName } from '../exercises';
+import { getEnabledExercises, getExerciseDef, getDisplayName, getShortName } from '../exercises';
 import styles from './SlotEditor.module.css';
 
 interface SlotEditorProps {
@@ -372,8 +372,7 @@ export function SlotEditor({ grid, initialSetIdx, initialExIdx, onUpdateSlot, on
                   <span className={styles.dot} style={{ background: MUSCLE_COLORS[ex.secondary] }} />
                 )}
               </span>
-              <span className={styles.itemName}>{ex.name}</span>
-              <span className={styles.itemAbbr}>{getShortName(ex.name)}</span>
+              <span className={styles.itemName}>{getDisplayName(ex.name)}</span>
               {inSetNames.has(ex.name)
                 ? <span className={styles.inSetDot} />
                 : filledNames.has(ex.name) && <span className={styles.filledDot} />}

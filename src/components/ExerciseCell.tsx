@@ -4,7 +4,7 @@ import styles from './ExerciseCell.module.css';
 
 interface Props {
   exerciseName: string;
-  isDuplicate: boolean;
+  duplicateType?: 'set' | 'workout';
   setIdx: number;
   exIdx: number;
   onTap?: () => void;
@@ -28,7 +28,7 @@ function getCellStyle(exerciseName: string): React.CSSProperties {
 
 export function ExerciseCell({
   exerciseName,
-  isDuplicate,
+  duplicateType,
   setIdx,
   exIdx,
   onTap,
@@ -46,7 +46,8 @@ export function ExerciseCell({
     styles.cell,
     size === 'small' && styles.cellSmall,
     !exerciseName && styles.empty,
-    isDuplicate && styles.duplicate,
+    duplicateType === 'set' && styles.duplicateSet,
+    duplicateType === 'workout' && styles.duplicateWorkout,
     editMode && styles.editMode,
     isSource && styles.source,
     isTarget && styles.target,

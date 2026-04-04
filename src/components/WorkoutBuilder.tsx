@@ -163,17 +163,22 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
 
   const refreshSaved = () => setSaved(loadWorkouts());
 
-  const duplicatesMap = useMemo(() => {
-    const map = new Map<string, Set<string>>();
+  const { setDupes, workoutDupes } = useMemo(() => {
+    const setDupes = new Map<string, Set<string>>();
+    const workoutCounts: Record<string, number> = {};
     for (let s = 0; s < workout.grid.length; s++) {
       const counts: Record<string, number> = {};
       for (const slot of workout.grid[s]) {
-        if (slot.exerciseName) counts[slot.exerciseName] = (counts[slot.exerciseName] || 0) + 1;
+        if (slot.exerciseName) {
+          counts[slot.exerciseName] = (counts[slot.exerciseName] || 0) + 1;
+          workoutCounts[slot.exerciseName] = (workoutCounts[slot.exerciseName] || 0) + 1;
+        }
       }
       const dupes = new Set(Object.entries(counts).filter(([, c]) => c > 1).map(([n]) => n));
-      map.set(String(s), dupes);
+      setDupes.set(String(s), dupes);
     }
-    return map;
+    const workoutDupes = new Set(Object.entries(workoutCounts).filter(([, c]) => c > 1).map(([n]) => n));
+    return { setDupes, workoutDupes };
   }, [workout.grid]);
 
   // Detect whether current workout has unsaved changes
@@ -442,7 +447,7 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
   const renderGridContent = () => (
     <>
       {workout.grid.map((row, s) => {
-        const dupes = duplicatesMap.get(String(s));
+        const dupes = setDupes.get(String(s));
         const numRows = Math.ceil(row.length / maxPerRow);
         const base = Math.floor(row.length / numRows);
         const extra = row.length % numRows;
@@ -471,7 +476,7 @@ export function WorkoutBuilder({ onStart, onEditExercises, initialWorkout }: Pro
                         <ExerciseCell
                           key={slot.id}
                           exerciseName={slot.exerciseName}
-                          isDuplicate={!!(slot.exerciseName && dupes?.has(slot.exerciseName))}
+                          duplicateType={slot.exerciseName ? (dupes?.has(slot.exerciseName) ? 'set' : workoutDupes.has(slot.exerciseName) ? 'workout' : undefined) : undefined}
                           setIdx={s}
                           exIdx={e}
                           onTap={() => setSlotEditor({ setIdx: s, exIdx: e })}

@@ -322,12 +322,6 @@
   font-weight: 500;
 }
 
-.itemAbbr {
-  font-size: 0.72rem;
-  color: var(--color-text-muted);
-  flex-shrink: 0;
-}
-
 .inSetDot {
   width: 7px;
   height: 7px;
