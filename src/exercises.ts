@@ -12,34 +12,33 @@ import type { ExerciseDefinition, MuscleGroup } from './types';
 
 const DEFAULT_EXERCISES: Omit<ExerciseDefinition, 'builtin' | 'enabled'>[] = [
   // -- Kettlebell exercises --
-  { name: 'Kettlebell Swing',               primary: 'back',      secondary: 'legs',      equipment: 'kettlebell' },
-  { name: 'Goblet Squat',                   primary: 'legs',                               equipment: 'kettlebell' },
-  { name: 'Turkish Get-Up',                 primary: 'fullBody',                            equipment: 'kettlebell' },
-  { name: 'Clean & Press',                  primary: 'fullBody',                            equipment: 'kettlebell' },
-  { name: 'Snatch',                         primary: 'fullBody',                            equipment: 'kettlebell' },
-  { name: 'Kettlebell Row',                 primary: 'back',                                equipment: 'kettlebell' },
-  { name: 'Kettlebell Deadlift',            primary: 'back',      secondary: 'legs',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Halo',                primary: 'shoulders', secondary: 'core',      equipment: 'kettlebell' },
-  { name: 'Figure 8',                       primary: 'core',      secondary: 'legs',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Windmill',            primary: 'core',      secondary: 'shoulders', equipment: 'kettlebell' },
-  { name: 'Kettlebell Thruster',            primary: 'fullBody',                            equipment: 'kettlebell' },
-  { name: 'Kettlebell Lunge',               primary: 'legs',                               equipment: 'kettlebell' },
-  { name: 'Kettlebell Clean',               primary: 'fullBody',                            equipment: 'kettlebell' },
-  { name: 'Kettlebell Press',               primary: 'shoulders',                           equipment: 'kettlebell' },
-  { name: 'Kettlebell High Pull',           primary: 'back',      secondary: 'shoulders', equipment: 'kettlebell' },
-  { name: 'Kettlebell Sumo Squat',          primary: 'legs',                               equipment: 'kettlebell' },
-  { name: 'Kettlebell Front Squat',         primary: 'legs',                               equipment: 'kettlebell' },
-  { name: 'Kettlebell Farmer Walk',         primary: 'core',      secondary: 'back',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Renegade Row',        primary: 'back',      secondary: 'core',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Around the World',    primary: 'core',      secondary: 'shoulders', equipment: 'kettlebell' },
-  { name: 'Kettlebell Single-Leg Deadlift', primary: 'legs',      secondary: 'back',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Floor Press',         primary: 'chest',                              equipment: 'kettlebell' },
-  { name: 'Kettlebell Crush Curl',          primary: 'arms',                               equipment: 'kettlebell' },
-  { name: 'Kettlebell Bent Press',          primary: 'shoulders', secondary: 'core',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Overhead Carry',      primary: 'shoulders', secondary: 'core',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Bob & Weave',         primary: 'legs',      secondary: 'core',      equipment: 'kettlebell' },
-  { name: 'Kettlebell Side Lunge',          primary: 'legs',                               equipment: 'kettlebell' },
-  { name: 'Kettlebell Push Press',          primary: 'shoulders', secondary: 'legs',      equipment: 'kettlebell' },
+  { name: 'Swing',               primary: 'back',      secondary: 'legs',      equipment: 'kettlebell' },
+  { name: 'Goblet Squat',        primary: 'legs',                               equipment: 'kettlebell' },
+  { name: 'Turkish Get-Up',      primary: 'fullBody',                            equipment: 'kettlebell' },
+  { name: 'Clean & Press',       primary: 'fullBody',                            equipment: 'kettlebell' },
+  { name: 'Snatch',              primary: 'fullBody',                            equipment: 'kettlebell' },
+  { name: 'Row',                 primary: 'back',                                equipment: 'kettlebell' },
+  { name: 'Deadlift',            primary: 'back',      secondary: 'legs',      equipment: 'kettlebell' },
+  { name: 'Halo',                primary: 'shoulders', secondary: 'core',      equipment: 'kettlebell' },
+  { name: 'Figure 8',            primary: 'core',      secondary: 'legs',      equipment: 'kettlebell' },
+  { name: 'Windmill',            primary: 'core',      secondary: 'shoulders', equipment: 'kettlebell' },
+  { name: 'Thruster',            primary: 'fullBody',                            equipment: 'kettlebell' },
+  { name: 'Clean',               primary: 'fullBody',                            equipment: 'kettlebell' },
+  { name: 'Press',               primary: 'shoulders',                           equipment: 'kettlebell' },
+  { name: 'High Pull',           primary: 'back',      secondary: 'shoulders', equipment: 'kettlebell' },
+  { name: 'Sumo Squat',          primary: 'legs',                               equipment: 'kettlebell' },
+  { name: 'Front Squat',         primary: 'legs',                               equipment: 'kettlebell' },
+  { name: 'Farmer Walk',         primary: 'core',      secondary: 'back',      equipment: 'kettlebell' },
+  { name: 'Renegade Row',        primary: 'back',      secondary: 'core',      equipment: 'kettlebell' },
+  { name: 'Around the World',    primary: 'core',      secondary: 'shoulders', equipment: 'kettlebell' },
+  { name: 'Single-Leg Deadlift', primary: 'legs',      secondary: 'back',      equipment: 'kettlebell' },
+  { name: 'Floor Press',         primary: 'chest',                              equipment: 'kettlebell' },
+  { name: 'Crush Curl',          primary: 'arms',                               equipment: 'kettlebell' },
+  { name: 'Bent Press',          primary: 'shoulders', secondary: 'core',      equipment: 'kettlebell' },
+  { name: 'Overhead Carry',      primary: 'shoulders', secondary: 'core',      equipment: 'kettlebell' },
+  { name: 'Bob & Weave',         primary: 'legs',      secondary: 'core',      equipment: 'kettlebell' },
+  { name: 'Side Lunge',          primary: 'legs',                               equipment: 'kettlebell' },
+  { name: 'Push Press',          primary: 'shoulders', secondary: 'legs',      equipment: 'kettlebell' },
 
   // -- Bodyweight exercises --
   { name: 'Plank',                          primary: 'core',                              equipment: 'bodyweight' },
@@ -66,6 +65,33 @@ const DEFAULT_EXERCISES: Omit<ExerciseDefinition, 'builtin' | 'enabled'>[] = [
   { name: 'Superman',                       primary: 'back',      secondary: 'core',      equipment: 'bodyweight' },
 ];
 
+/** Maps old exercise names → new names for localStorage migration */
+export const NAME_MIGRATION: Record<string, string> = {
+  'Kettlebell Swing': 'Swing',
+  'Kettlebell Row': 'Row',
+  'Kettlebell Deadlift': 'Deadlift',
+  'Kettlebell Halo': 'Halo',
+  'Kettlebell Windmill': 'Windmill',
+  'Kettlebell Thruster': 'Thruster',
+  'Kettlebell Lunge': 'Lunge',  // merged with bodyweight Lunge
+  'Kettlebell Clean': 'Clean',
+  'Kettlebell Press': 'Press',
+  'Kettlebell High Pull': 'High Pull',
+  'Kettlebell Sumo Squat': 'Sumo Squat',
+  'Kettlebell Front Squat': 'Front Squat',
+  'Kettlebell Farmer Walk': 'Farmer Walk',
+  'Kettlebell Renegade Row': 'Renegade Row',
+  'Kettlebell Around the World': 'Around the World',
+  'Kettlebell Single-Leg Deadlift': 'Single-Leg Deadlift',
+  'Kettlebell Floor Press': 'Floor Press',
+  'Kettlebell Crush Curl': 'Crush Curl',
+  'Kettlebell Bent Press': 'Bent Press',
+  'Kettlebell Overhead Carry': 'Overhead Carry',
+  'Kettlebell Bob & Weave': 'Bob & Weave',
+  'Kettlebell Side Lunge': 'Side Lunge',
+  'Kettlebell Push Press': 'Push Press',
+};
+
 // ── localStorage persistence ───────────────────────────────────────────
 
 const LIBRARY_KEY = 'kettleclock_exercises';
@@ -76,14 +102,17 @@ function seedDefaults(): ExerciseDefinition[] {
 
 /** Migrate old exercises that don't have equipment/builtin/enabled fields */
 function migrateExercise(e: any): ExerciseDefinition {
-  const defaultMatch = DEFAULT_EXERCISES.find((d) => d.name === e.name);
+  const migratedName = NAME_MIGRATION[e.name] ?? e.name;
+  const defaultMatch = DEFAULT_EXERCISES.find((d) => d.name === migratedName)
+    ?? DEFAULT_EXERCISES.find((d) => d.name === e.name);
   return {
-    name: e.name,
+    name: migratedName,
     primary: e.primary,
     secondary: e.secondary,
     equipment: (e.equipment === 'kettlebell' || e.equipment === 'bodyweight' || e.equipment === 'either')
       ? e.equipment
       : defaultMatch?.equipment ?? (
+          NAME_MIGRATION[e.name] !== undefined ||
           e.name.startsWith('Kettlebell ') ||
           ['Goblet Squat', 'Turkish Get-Up', 'Clean & Press', 'Snatch', 'Figure 8'].includes(e.name)
             ? 'kettlebell' : 'bodyweight'
@@ -99,7 +128,15 @@ function loadFromStorage(): ExerciseDefinition[] | null {
     if (!raw) return null;
     const arr = JSON.parse(raw);
     if (!Array.isArray(arr)) return null;
-    return arr.map(migrateExercise);
+    const migrated = arr.map(migrateExercise);
+    // Deduplicate by name (migration may create duplicates)
+    const seen = new Set<string>();
+    const deduped = migrated.filter((e) => {
+      if (seen.has(e.name)) return false;
+      seen.add(e.name);
+      return true;
+    });
+    return deduped;
   } catch {
     return null;
   }

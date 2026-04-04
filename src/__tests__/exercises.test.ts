@@ -50,7 +50,7 @@ describe('exercises', () => {
 
   describe('getExerciseDef', () => {
     it('returns a known exercise by name', () => {
-      const ex = getExerciseDef('Kettlebell Swing');
+      const ex = getExerciseDef('Swing');
       expect(ex).toBeDefined();
       expect(ex!.primary).toBe('back');
     });
@@ -72,7 +72,7 @@ describe('exercises', () => {
     it('returns exercises matching secondary muscle group', () => {
       // Kettlebell Swing has secondary: 'legs'
       const legs = getExercisesByMuscle('legs');
-      const swing = legs.find((e) => e.name === 'Kettlebell Swing');
+      const swing = legs.find((e) => e.name === 'Swing');
       expect(swing).toBeDefined();
       expect(swing!.secondary).toBe('legs');
     });
@@ -137,9 +137,9 @@ describe('exercises', () => {
     });
 
     it('refuses to delete a built-in exercise', () => {
-      const deleted = deleteExercise('Kettlebell Swing');
+      const deleted = deleteExercise('Swing');
       expect(deleted).toBe(false);
-      expect(getExerciseDef('Kettlebell Swing')).toBeDefined();
+      expect(getExerciseDef('Swing')).toBeDefined();
     });
 
     it('returns false when deleting nonexistent exercise', () => {
@@ -149,12 +149,12 @@ describe('exercises', () => {
 
   describe('toggleExerciseEnabled', () => {
     it('toggles enabled state', () => {
-      const before = getExerciseDef('Kettlebell Swing')!.enabled;
-      toggleExerciseEnabled('Kettlebell Swing');
-      expect(getExerciseDef('Kettlebell Swing')!.enabled).toBe(!before);
+      const before = getExerciseDef('Swing')!.enabled;
+      toggleExerciseEnabled('Swing');
+      expect(getExerciseDef('Swing')!.enabled).toBe(!before);
       // Toggle back to restore
-      toggleExerciseEnabled('Kettlebell Swing');
-      expect(getExerciseDef('Kettlebell Swing')!.enabled).toBe(before);
+      toggleExerciseEnabled('Swing');
+      expect(getExerciseDef('Swing')!.enabled).toBe(before);
     });
 
     it('does nothing for unknown name', () => {
@@ -165,11 +165,11 @@ describe('exercises', () => {
 
   describe('isNameTaken', () => {
     it('returns true for an existing name', () => {
-      expect(isNameTaken('Kettlebell Swing')).toBe(true);
+      expect(isNameTaken('Swing')).toBe(true);
     });
 
     it('is case-insensitive', () => {
-      expect(isNameTaken('kettlebell swing')).toBe(true);
+      expect(isNameTaken('swing')).toBe(true);
     });
 
     it('returns false for a new name', () => {
@@ -177,7 +177,7 @@ describe('exercises', () => {
     });
 
     it('excludes a given name from the check', () => {
-      expect(isNameTaken('Kettlebell Swing', 'Kettlebell Swing')).toBe(false);
+      expect(isNameTaken('Swing', 'Swing')).toBe(false);
     });
   });
 
