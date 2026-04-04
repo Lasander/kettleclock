@@ -26,6 +26,7 @@ kettleclock/
 │   ├── App.tsx                     # Root: routes between Builder, Timer, Summary
 │   ├── types.ts                    # Shared TypeScript types
 │   ├── exercises.ts                # Exercise library with muscle groups
+│   │                                # Exports: getDisplayName(), getShortName()
 │   ├── segments.ts                 # Workout grid → flat segment list
 │   ├── storage.ts                  # localStorage helpers
 │   ├── audio.ts                    # Web Audio beep/sound helpers
@@ -101,6 +102,9 @@ Each exercise cell is a ~50–60 px square showing:
 - **Background colour** from primary muscle group
 - **Diagonal split** (45° linear-gradient) when exercise has two muscle groups
 - **Grey** (#555) for empty/unassigned slots
+- **Duplicate dot** (8 px circle, top-right): yellow (`#f59e0b`) for same-set duplicates, red (`var(--color-danger)`) for cross-set duplicates; yellow takes priority when both apply
+
+`getDisplayName()` strips "Kettlebell "/"KB " prefixes for list display (SlotEditor exercise list, WorkoutDetails rows). `getShortName()` further truncates to ≤10 chars for grid cells.
 
 Muscle group colour map (vibrant / muted):
 | Group | Colour | Vibrant | Muted |
@@ -200,10 +204,10 @@ When aborting, the workout object is passed back to the Builder via `initialWork
 - CSS `env(safe-area-inset-*)` for notched phones — each screen manages its own safe-area padding (no global body/root padding); full-screen views (WorkoutDetails, ExerciseLibrary, Summary, Timer, Swap/Clear overlay) respect `safe-area-inset-top`
 - Body uses `height: 100dvh; overflow: hidden` to prevent page-level scrolling; Timer uses `height: 100dvh; overflow: hidden`; Summary uses `height: 100dvh; overflow-y: auto`
 - **Setup screen**: uses `100dvh` for full viewport height; grid header ("Exercise Grid" label + Swap/Clear button) and muscle legend stay fixed at top; exercise grid cells scroll vertically; "Start Workout" button pinned at bottom
-- **Swap/Clear mode**: full-screen overlay with animated entry; cells show × badge (top-left corner, partly outside cell via `overflow: visible`), drag to swap, undo/redo stack (up to 50 entries); both stacks cleared on exit edit mode or loading/creating workouts
+- **Swap/Clear mode**: full-screen overlay with animated entry; cells show × badge (top-left corner, partly outside cell via `overflow: visible`, `z-index: 10` to prevent clipping by adjacent cells), edit overlay grid has padding to prevent edge clipping; drag to swap, undo/redo stack (up to 50 entries); both stacks cleared on exit edit mode or loading/creating workouts
 - **Number controls**: show large value by default; tap to reveal edit input; pending digit indicator uses green (`#4ade80`)
 - **Grid cells**: tap to open Slot Editor, long-press to enter Swap/Clear mode
-- **WorkoutDetails**: uses "← Back" button (not ✕) for navigation
+- **WorkoutDetails**: uses "← Back" button (not ✕) for navigation; header styling matches ExerciseLibrary (same font sizes, colours, padding)
 
 ## Audio Strategy
 

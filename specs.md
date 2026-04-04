@@ -69,6 +69,7 @@ Each exercise cell is a **coloured rectangle** showing a short name:
 - Background colour from primary muscle group
 - **Diagonal split** for exercises with a secondary muscle group
 - **Grey** for empty/unassigned slots
+- **Duplicate indicators**: a small dot in the top-right corner flags repeated exercises — **yellow** for a duplicate within the same set, **red** for a duplicate across different sets. Yellow (same-set) takes priority when both apply. Shown in the workout grid, Workout Details, and Slot Editor views.
 - The legend is shown in spectrum order so muscle balance is visible at a glance
 
 ### Default Timing
@@ -84,8 +85,8 @@ All defaults are editable per-workout.
 ### Per-Exercise Overrides (Workout Details)
 
 Accessible via **"Workout Details"** in the hamburger menu on the Setup page. Opens a full-screen overlay showing a vertical list of all exercises grouped by set. Each row displays:
-- A small colour-coded exercise cell
-- The exercise short name
+- A small colour-coded exercise cell (with duplicate dot indicators)
+- The exercise display name ("Kettlebell" prefix stripped for readability)
 - Two time badges: exercise duration and rest-after time
 
 Default values appear in a muted/dimmed colour; custom overrides appear in normal colour.
@@ -108,7 +109,7 @@ The underlying data model is unchanged — `ExerciseSlot` still uses optional `d
   - **Long press any cell → enter Swap/Clear mode**
 - **Swap/Clear mode** (full-screen overlay with animated entry):
   - Drag any cell to any other position across the whole grid to swap
-  - Each cell shows a **× badge** (top-left corner, iPhone home-screen badge style, partly outside the cell) to clear that exercise
+  - Each cell shows a **× badge** (top-left corner, iPhone home-screen badge style, partly outside the cell, elevated z-index to prevent clipping by adjacent cells) to clear that exercise
   - **Undo/Redo**: full undo/redo stack (up to 50 entries); Redo button appears when redo stack is non-empty
   - Both stacks are cleared on exiting edit mode or loading/creating workouts
   - Tap **"Done"** to exit
@@ -123,7 +124,7 @@ The underlying data model is unchanged — `ExerciseSlot` still uses optional `d
   - **⋯ options menu** also contains:
     - **Equipment filter** (All / 🔔 / 🤸) — icon-only buttons
     - **Clear All** button to reset all slots to empty
-  - **Exercise list** below the strip: muscle group filter chips, scrollable list of enabled exercises sorted alphabetically by short name, with colour dots and in-set/in-grid indicators
+  - **Exercise list** below the strip: muscle group filter chips, scrollable list of enabled exercises sorted alphabetically, with colour dots and in-set/in-grid indicators. Exercise names strip the "Kettlebell" prefix for cleaner display (e.g. "Kettlebell Swing" → "Swing").
   - Tap any slot in the strip to jump to it directly
   - Auto-advance wraps from the last slot back to the first
 - Default timing controls (exercise, rest, set rest)
