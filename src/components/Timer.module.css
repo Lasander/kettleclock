@@ -6,8 +6,9 @@
   padding: 20px 16px;
   padding-top: max(env(safe-area-inset-top), 20px);
   padding-bottom: max(env(safe-area-inset-bottom), 20px);
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   transition: background 0.35s ease;
 }
 

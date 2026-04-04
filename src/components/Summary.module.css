@@ -7,6 +7,9 @@
   padding: 40px 16px;
   padding-top: max(env(safe-area-inset-top), 40px);
   text-align: center;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
 }
 
 .trophy {
