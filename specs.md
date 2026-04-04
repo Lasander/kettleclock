@@ -101,15 +101,16 @@ The underlying data model is unchanged — `ExerciseSlot` still uses optional `d
 - Name the workout
 - Set **number of sets** and **exercises per set** (sizes the grid)
 - **Number controls**: show a large readable number; tap to edit
-- **Setup screen layout**: uses full viewport height (`100dvh`). The exercise grid scrolls vertically within its space. The "Start Workout" button is always visible at the bottom and shows the **calculated total workout time** (e.g. "Start Workout · 25m 30s"), computed from `buildSegments`.
+- **Setup screen layout**: uses full viewport height (`100dvh`). The grid header ("Exercise Grid" label + Swap/Clear button) and muscle legend stay fixed at top; only the exercise grid cells scroll vertically. The "Start Workout" button is always visible at the bottom and shows the **calculated total workout time** (e.g. "Start Workout · 25m 30s"), computed from `buildSegments`.
 - **Visual exercise grid** (coloured rectangles):
   - Tap any cell → opens the **Slot Editor** (full-screen overlay for assigning exercises)
   - Duplicate assignments flagged visually
   - **Long press any cell → enter Swap/Clear mode**
 - **Swap/Clear mode** (full-screen overlay with animated entry):
   - Drag any cell to any other position across the whole grid to swap
-  - Each cell shows a **× icon** to clear that individual exercise
-  - **Undo button** reverts the last swap or clear action
+  - Each cell shows a **× badge** (top-left corner, iPhone home-screen badge style, partly outside the cell) to clear that exercise
+  - **Undo/Redo**: full undo/redo stack (up to 50 entries); Redo button appears when redo stack is non-empty
+  - Both stacks are cleared on exiting edit mode or loading/creating workouts
   - Tap **"Done"** to exit
 - **Slot Editor** (full-screen overlay):
   - **Slot strip**: horizontally scrollable row of all grid cells flattened across sets
@@ -118,11 +119,11 @@ The underlying data model is unchanged — `ExerciseSlot` still uses optional `d
     - Active slot highlighted with a red border
     - Cells show muted muscle-group colours matching the main grid
   - **Default mode** (Fill Empty): after selecting an exercise, auto-advances to the next empty slot. When all slots are filled, the picker **stays open** (does not auto-close) so the user can continue reassigning.
-  - **"Overwrite filled" checkbox** in the **⋯ options menu**: when checked, advances to the next slot sequentially (wraps around) regardless of whether it's filled.
+  - **"Overwrite filled" toggle switch** in the **⋯ options menu**: when enabled, advances to the next slot sequentially (wraps around) regardless of whether it's filled.
   - **⋯ options menu** also contains:
-    - **Equipment filter** (All / 🔔 Kettlebell / 🤸 Bodyweight)
+    - **Equipment filter** (All / 🔔 / 🤸) — icon-only buttons
     - **Clear All** button to reset all slots to empty
-  - **Exercise list** below the strip: muscle group filter chips, scrollable list of enabled exercises with colour dots and in-set/in-grid indicators
+  - **Exercise list** below the strip: muscle group filter chips, scrollable list of enabled exercises sorted alphabetically by short name, with colour dots and in-set/in-grid indicators
   - Tap any slot in the strip to jump to it directly
   - Auto-advance wraps from the last slot back to the first
 - Default timing controls (exercise, rest, set rest)
@@ -136,7 +137,7 @@ The underlying data model is unchanged — `ExerciseSlot` still uses optional `d
 Accessible from the Setup phase via the hamburger menu. Manages the full list of exercises available for workout building.
 
 #### Viewing
-- Shows all exercises (defaults + custom) in a scrollable list
+- Shows all exercises (defaults + custom) in a scrollable list, sorted alphabetically by short name
 - Each row shows: colour dot(s) for muscle groups, name, equipment icon, and an enable/disable toggle
 - Filterable by equipment type (Kettlebell / Bodyweight) and muscle group, same as the exercise picker
 
@@ -193,7 +194,7 @@ Accessible from the Setup phase via the hamburger menu. Manages the full list of
 ### 4. Summary Phase
 
 - Total elapsed time
-- **Exercise vs rest breakdown**: planned exercise time and rest/recovery time shown alongside the total
+- **Exercise vs rest breakdown**: actual elapsed exercise time and rest/recovery time tracked during the workout (paused time excluded from both), shown alongside total
 - Sets × exercises completed
 - Option to re-run or return to Setup
 
@@ -201,10 +202,10 @@ Accessible from the Setup phase via the hamburger menu. Manages the full list of
 
 - **Mobile-first**: fully usable on phones ≥ 320 px wide
 - **Touch-optimised**: large tap targets (≥ 48 px), native pickers, pointer-event drag
-- **Safe area**: all full-screen views (WorkoutDetails, ExerciseLibrary, Summary, Timer, Swap/Clear overlay) respect `env(safe-area-inset-top)` for notched phones
+- **Safe area**: each screen manages its own `env(safe-area-inset-*)` padding for notched phones (no global body/root padding)
 - **Offline-capable**: no server; all data in `localStorage`
 - **No account / auth**: single-user, local-only
 - **Portable**: static site, any HTTP server or `file://`
 - **Wake lock**: prevent phone sleep during active Workout phase
-- **Audio**: works on iOS Safari via `webkitAudioContext` fallback; AudioContext resumed from user gesture
+- **Audio**: works on iOS Safari via `webkitAudioContext` fallback; AudioContext resumed from user gesture, periodically re-resumed during workouts (every 10 s and on visibility change) to prevent iOS suspension
 - **Cross-browser**: iOS Safari (non-HTTPS) + Chrome; no APIs requiring secure context

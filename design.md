@@ -174,7 +174,7 @@ The “Start Workout” button in `WorkoutBuilder` displays the calculated total
 
 ### Summary Breakdown
 
-`Summary` uses `buildSegments` to calculate planned exercise time vs rest time (initial countdown + exercise rest + set rest). Displayed alongside the actual elapsed wall-clock time.
+`Summary` receives actual elapsed exercise and rest seconds from `Timer` (tracked via refs, incrementing each tick based on current segment type). Paused time is excluded — the timer doesn't tick while paused. The `onDone` callback passes `(elapsed, exerciseElapsed, restElapsed)` through `App` to `Summary`.
 
 ## Screens & Navigation
 
@@ -197,9 +197,10 @@ When aborting, the workout object is passed back to the Builder via `initialWork
 - Single-column layout; no horizontal scrolling
 - Touch targets ≥ 48 × 48 px with adequate spacing
 - Timer screen goes near-fullscreen (hides builder chrome)
-- CSS `env(safe-area-inset-*)` for notched phones — all full-screen views (WorkoutDetails, ExerciseLibrary, Summary, Timer, Swap/Clear overlay) respect `safe-area-inset-top`
-- **Setup screen**: uses `100dvh` for full viewport height; exercise grid scrolls vertically; "Start Workout" button pinned at bottom
-- **Swap/Clear mode**: full-screen overlay with animated entry; cells show × to clear, drag to swap, undo for last action
+- CSS `env(safe-area-inset-*)` for notched phones — each screen manages its own safe-area padding (no global body/root padding); full-screen views (WorkoutDetails, ExerciseLibrary, Summary, Timer, Swap/Clear overlay) respect `safe-area-inset-top`
+- Body uses `height: 100dvh; overflow: hidden` to prevent page-level scrolling; Timer uses `height: 100dvh; overflow: hidden`; Summary uses `height: 100dvh; overflow-y: auto`
+- **Setup screen**: uses `100dvh` for full viewport height; grid header ("Exercise Grid" label + Swap/Clear button) and muscle legend stay fixed at top; exercise grid cells scroll vertically; "Start Workout" button pinned at bottom
+- **Swap/Clear mode**: full-screen overlay with animated entry; cells show × badge (top-left corner, partly outside cell via `overflow: visible`), drag to swap, undo/redo stack (up to 50 entries); both stacks cleared on exit edit mode or loading/creating workouts
 - **Number controls**: show large value by default; tap to reveal edit input; pending digit indicator uses green (`#4ade80`)
 - **Grid cells**: tap to open Slot Editor, long-press to enter Swap/Clear mode
 - **WorkoutDetails**: uses "← Back" button (not ✕) for navigation
@@ -213,6 +214,13 @@ Generate tones programmatically via `OscillatorNode`:
 - **Set rest start**: 440 Hz, 300 ms
 
 No audio files to load → works offline and keeps bundle tiny.
+
+### iOS Audio Persistence
+
+`ensureAudioActive()` re-resumes the `AudioContext` if iOS Safari suspends it. Called:
+- Periodically via `setInterval` every 10 s while the timer is active
+- On `visibilitychange` when the page becomes visible
+- On Pause/Resume button tap (via `resumeAudio()`)
 
 ## Wake Lock
 
