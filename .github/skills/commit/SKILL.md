@@ -109,3 +109,4 @@ git commit -m "docs: update specs and design for exercise library feature"
 - Use imperative mood: "add", "fix", "update" — not "added", "fixes", "updated"
 - The body explains **what** and **why**, not **how** (the diff shows how)
 - If changes are not yet verified (`tsc --noEmit` / `vite build`), verify first before committing
+- **One logical change per commit** — each independent change gets its own self-contained commit. Never bundle multiple unrelated changes (e.g. a bug fix and a new feature, or two separate bug fixes) into a single commit. A commit should be revertable without affecting other changes.

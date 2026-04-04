@@ -118,3 +118,4 @@ If the user provides follow-up feedback:
 - **DO NOT** proceed past a failing build — fix it first
 - **Always** verify TypeScript compiles cleanly before committing
 - **Always** report honestly about gaps and assumptions
+- **Address every item** — when the user provides multiple requests (numbered, bulleted, or separated by `--`), create a separate todo item for each one and ensure each is implemented, verified, and committed independently. If an item is ambiguous, ask for clarification rather than skipping it.
